@@ -7,21 +7,24 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 ensure_dirs
 
-BUSYBOX_ROOT="${BUILD_DIR}/busybox-root"
+BUSYBOX_ROOT="${OUT_DIR}/packages/busybox/rootfs"
 
-ROOTFS_BUILD="${BUILD_DIR}/rootfs-bootstrap"
-INITRAMFS_OUT="${OUT_DIR}/initramfs"
+ROOTFS_BUILD="${BUILD_DIR}/images/bootstrap/rootfs"
+
+IMAGE_OUT="${OUT_DIR}/images/bootstrap"
+
+INITRAMFS_FILE="${IMAGE_OUT}/initramfs.img"
 
 [[ -x "${BUSYBOX_ROOT}/bin/busybox" ]] \
-    || die "BusyBox root not found. Run build-busybox.sh first."
+    || die "BusyBox package output not found. Run: ./veyr build busybox"
 
-log "Preparing Veyr bootstrap root filesystem"
+log "Preparing Veyr ${VEYR_VERSION} bootstrap root filesystem"
 
 rm -rf "${ROOTFS_BUILD}"
 
 mkdir -p \
     "${ROOTFS_BUILD}" \
-    "${INITRAMFS_OUT}"
+    "${IMAGE_OUT}"
 
 cp -a \
     "${BUSYBOX_ROOT}/." \
@@ -61,11 +64,13 @@ log "Creating compressed initramfs"
         | cpio \
             --null \
             --create \
-            --verbose \
             --format=newc \
             --owner=0:0 \
         | gzip -9 \
-        > "${INITRAMFS_OUT}/veyr-initramfs-${VEYR_VERSION}.img"
+        > "${INITRAMFS_FILE}"
 )
 
-success "Initramfs created"
+[[ -f "${INITRAMFS_FILE}" ]] \
+    || die "Initramfs was not created"
+
+success "Initramfs created: ${INITRAMFS_FILE}"

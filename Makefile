@@ -1,45 +1,54 @@
 SHELL := /usr/bin/env bash
 
 .PHONY: all
-all:
-	./scripts/build-all.sh
+all: image
 
 .PHONY: deps
 deps:
 	./scripts/setup-fedora.sh
 
+.PHONY: doctor
+doctor:
+	./veyr doctor
+
+.PHONY: list
+list:
+	./veyr list packages
+	@echo
+	./veyr list profiles
+
+.PHONY: graph
+graph:
+	./veyr graph bootstrap
+
 .PHONY: fetch
 fetch:
-	./scripts/fetch-sources.sh
+	./veyr fetch --profile bootstrap
 
 .PHONY: busybox
 busybox:
-	./scripts/build-busybox.sh
+	./veyr build busybox
 
 .PHONY: kernel
 kernel:
-	./scripts/build-kernel.sh
+	./veyr build linux
 
-.PHONY: initramfs
-initramfs:
-	./scripts/build-initramfs.sh
+.PHONY: build
+build:
+	./veyr build --profile bootstrap
 
-.PHONY: iso
-iso:
-	./scripts/build-iso.sh
+.PHONY: image
+image:
+	./veyr image bootstrap
 
 .PHONY: run
 run:
-	./scripts/run-qemu.sh
+	./veyr run bootstrap
 
 .PHONY: clean
 clean:
-	rm -rf build/*
-	rm -rf out/*
-	touch build/.gitkeep
-	touch out/.gitkeep
+	./veyr clean
 
 .PHONY: distclean
-distclean: clean
-	rm -rf sources/*
-	touch sources/.gitkeep
+distclean:
+	./veyr clean --sources

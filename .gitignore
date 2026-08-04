@@ -10,8 +10,18 @@
 /out/*
 !/out/.gitkeep
 
+# Python virtual environments
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
 # Temporary files
 *.tmp
+*.part
 *.log
 *.swp
 *~
@@ -20,9 +30,8 @@
 .vscode/
 .idea/
 
-# Python
-__pycache__/
-*.pyc
-
 # OS
 .DS_Store
+
+# ZIP
+*.zip

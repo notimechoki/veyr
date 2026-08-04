@@ -10,7 +10,7 @@ SOURCES_DIR="${ROOT_DIR}/sources"
 BUILD_DIR="${ROOT_DIR}/build"
 OUT_DIR="${ROOT_DIR}/out"
 
-source "${CONFIG_DIR}/versions.env"
+VEYR_VERSION="$(tr -d '[:space:]' < "${ROOT_DIR}/VERSION")"
 
 log() {
     printf '\n\033[1;34m[VEYR]\033[0m %s\n' "$*"
@@ -30,7 +30,8 @@ die() {
 }
 
 require_command() {
-    command -v "$1" >/dev/null 2>&1 || die "Required command not found: $1"
+    command -v "$1" >/dev/null 2>&1 \
+        || die "Required command not found: $1"
 }
 
 ensure_dirs() {

@@ -1,0 +1,7 @@
+[profile]
+id = "base"
+name = "Veyr Base"
+status = "planned"
+description = "Shared core system for every future Veyr edition"
+parent = ""
+packages = []

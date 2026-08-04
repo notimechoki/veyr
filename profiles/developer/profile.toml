@@ -1,0 +1,10 @@
+[profile]
+id = "developer"
+name = "Veyr Developer"
+status = "planned"
+description = "Veyr development workstation"
+parent = "base"
+packages = []
+
+[desktop]
+environment = "hyprland"

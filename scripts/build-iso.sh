@@ -7,18 +7,21 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 ensure_dirs
 
-ISO_ROOT="${BUILD_DIR}/iso-root"
+ISO_ROOT="${BUILD_DIR}/images/bootstrap/iso-root"
 
-KERNEL="${OUT_DIR}/kernel/vmlinuz-${LINUX_VERSION}"
-INITRAMFS="${OUT_DIR}/initramfs/veyr-initramfs-${VEYR_VERSION}.img"
+IMAGE_OUT="${OUT_DIR}/images/bootstrap"
 
-ISO_FILE="${OUT_DIR}/Veyr-${VEYR_VERSION}-bootstrap-x86_64.iso"
+KERNEL="${OUT_DIR}/packages/linux/vmlinuz"
+
+INITRAMFS="${IMAGE_OUT}/initramfs.img"
+
+ISO_FILE="${IMAGE_OUT}/Veyr-${VEYR_VERSION}-bootstrap-x86_64.iso"
 
 [[ -f "${KERNEL}" ]] \
-    || die "Kernel not found"
+    || die "Kernel package output not found. Run: ./veyr build linux"
 
 [[ -f "${INITRAMFS}" ]] \
-    || die "Initramfs not found"
+    || die "Initramfs not found. Run: ./scripts/build-initramfs.sh"
 
 require_command grub2-mkrescue
 require_command xorriso
@@ -42,7 +45,7 @@ cp \
     "${ROOT_DIR}/iso/grub/grub.cfg" \
     "${ISO_ROOT}/boot/grub/grub.cfg"
 
-log "Creating Veyr ISO"
+log "Creating Veyr ${VEYR_VERSION} bootstrap ISO"
 
 rm -f "${ISO_FILE}"
 
@@ -53,8 +56,8 @@ grub2-mkrescue \
 [[ -f "${ISO_FILE}" ]] \
     || die "ISO creation failed"
 
-success "ISO created:"
-echo "${ISO_FILE}"
+success "ISO created: ${ISO_FILE}"
 
 echo
+
 sha256sum "${ISO_FILE}"

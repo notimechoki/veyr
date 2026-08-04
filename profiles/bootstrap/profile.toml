@@ -1,0 +1,14 @@
+[profile]
+id = "bootstrap"
+name = "Veyr Bootstrap"
+status = "active"
+description = "Minimal bootable development image used to validate the Veyr build pipeline"
+parent = ""
+packages = ["busybox", "linux"]
+
+[image]
+steps = [
+  "scripts/build-initramfs.sh",
+  "scripts/build-iso.sh",
+]
+run = "scripts/run-qemu.sh"

@@ -2,9 +2,10 @@
 
 set -Eeuo pipefail
 
-echo "Installing Veyr build dependencies..."
+echo "Installing Veyr Forge and bootstrap build dependencies..."
 
 sudo dnf install -y \
+    python3 \
     gcc \
     gcc-c++ \
     make \
@@ -22,6 +23,7 @@ sudo dnf install -y \
     bzip2 \
     xz \
     tar \
+    file \
     openssl-devel \
     elfutils-libelf-devel \
     ncurses-devel \
@@ -33,4 +35,7 @@ sudo dnf install -y \
     qemu-ui-gtk
 
 echo
+
 echo "Veyr build dependencies installed."
+
+echo "Run './veyr doctor' to verify the host."

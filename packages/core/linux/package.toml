@@ -1,0 +1,19 @@
+[package]
+name = "linux"
+version = "7.1.5"
+category = "core"
+description = "Linux kernel used by the Veyr bootstrap image"
+dependencies = []
+required_commands = ["gcc", "make", "bc", "bison", "flex", "perl"]
+outputs = [
+  "out/packages/linux/vmlinuz",
+  "out/packages/linux/config",
+]
+
+[source]
+url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.1.5.tar.xz"
+archive = "linux-7.1.5.tar.xz"
+sha256 = "22a0196b3cbcdf34dc27b77561f4d040585fd3447edc9ab3531a1ac79e3041e7"
+
+[build]
+script = "build.sh"

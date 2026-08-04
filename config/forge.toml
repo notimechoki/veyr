@@ -1,0 +1,26 @@
+[project]
+name = "Veyr"
+format = 1
+architecture = "x86_64"
+min_python = "3.11"
+
+[paths]
+packages = "packages"
+profiles = "profiles"
+sources = "sources/distfiles"
+build = "build"
+out = "out"
+
+[host]
+required_commands = [
+  "python3",
+  "gcc",
+  "make",
+  "tar",
+  "cpio",
+  "gzip",
+  "file",
+  "grub2-mkrescue",
+  "xorriso",
+  "qemu-system-x86_64",
+]

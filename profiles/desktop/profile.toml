@@ -1,0 +1,10 @@
+[profile]
+id = "desktop"
+name = "Veyr Desktop"
+status = "planned"
+description = "Veyr for everyday desktop users"
+parent = "base"
+packages = []
+
+[desktop]
+environment = "plasma"
