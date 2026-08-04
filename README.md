@@ -249,70 +249,6 @@ Later stages will add:
 
 ---
 
-## Screenshots to add later
-
-Recommended real screenshots for the repository:
-
-1. **GRUB / boot menu** — first Veyr entry selection.
-2. **Bootstrap shell** — the initial Veyr shell prompt after boot.
-3. **Forge CLI** — `./veyr list profiles` and `./veyr graph bootstrap`.
-4. **Forge build** — `./veyr image bootstrap` in progress.
-5. **Future**: Veyr Desktop screenshots when Plasma is ready.
-
-For now the repository already includes a branding banner:
-
-- `assets/banner/veyr-banner.png`
-
-You can later replace or extend it with real screenshots from QEMU.
-
----
-
-## Branding assets included
-
-This archive includes:
-
-- `assets/banner/veyr-banner.png`
-- `assets/icons/veyr-mark.svg`
-- `assets/icons/veyr-wordmark.svg`
-
-You can use them in:
-
-- GitHub README,
-- release notes,
-- project website,
-- future installer and system branding.
-
----
-
-## Planned direction
-
-### Short-term
-
-- finish the Forge prototype,
-- validate bootstrap image generation through Forge,
-- publish the repository,
-- begin `0.1 Veyr Base`.
-
-### Mid-term
-
-- bootstrap toolchain,
-- glibc,
-- bash,
-- coreutils,
-- systemd,
-- persistent root filesystem,
-- package repository groundwork.
-
-### Long-term
-
-- **Veyr Desktop** with KDE Plasma,
-- graphical software installation,
-- graphical updates,
-- Windows-familiar UX,
-- **Veyr Developer** on top of shared Veyr Base.
-
----
-
 ## Roadmap
 
 See: [`docs/ROADMAP.md`](docs/ROADMAP.md)
@@ -321,35 +257,6 @@ See: [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
 ## License
 
-At the moment, the repository can be published with the **MIT License** for the Veyr project files (scripts, tooling, manifests, documentation).
-
-Note that Veyr builds and redistributes many upstream components that keep their own licenses.
+MIT License.
 
 ---
-
-## Suggested GitHub repository metadata
-
-### Repository name
-
-```text
-veyr
-```
-
-### Suggested description
-
-```text
-An independent Linux distribution built from upstream components, featuring a custom build system called Veyr Forge.
-```
-
-### Suggested topics
-
-```text
-linux distribution distro linux-from-scratch operating-system kernel build-system qemu system-programming busybox toolchain forge
-```
-
----
-
-## Author note
-
-Veyr is currently a personal long-term systems project.
-The goal is not just to theme an existing distro, but to build a real independent Linux distribution step by step.
