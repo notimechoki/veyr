@@ -1,0 +1,28 @@
+# Build artifacts
+/build/*
+!/build/.gitkeep
+
+# Downloaded source archives
+/sources/*
+!/sources/.gitkeep
+
+# Generated releases
+/out/*
+!/out/.gitkeep
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

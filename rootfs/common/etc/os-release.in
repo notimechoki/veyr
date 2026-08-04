@@ -1,0 +1,10 @@
+NAME="Veyr"
+PRETTY_NAME="Veyr Linux @VERSION@ Bootstrap"
+ID=veyr
+ID_LIKE=
+VERSION="@VERSION@"
+VERSION_ID="@VERSION@"
+BUILD_ID="@VERSION@"
+HOME_URL="https://veyr.invalid/"
+SUPPORT_URL="https://veyr.invalid/"
+BUG_REPORT_URL="https://veyr.invalid/"

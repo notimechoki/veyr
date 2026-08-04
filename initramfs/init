@@ -1,0 +1,48 @@
+#!/bin/sh
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export HOME=/root
+export TERM=linux
+
+mkdir -p \
+    /dev \
+    /proc \
+    /sys \
+    /run \
+    /tmp \
+    /root
+
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /run
+mount -t tmpfs tmpfs /tmp
+
+hostname veyr
+
+clear
+
+cat /etc/motd
+
+echo
+echo "System information:"
+echo "-------------------"
+echo "Hostname: $(hostname)"
+echo "Kernel:   $(uname -r)"
+echo "Arch:     $(uname -m)"
+
+echo
+echo "Veyr bootstrap environment is running."
+echo
+
+echo "Useful commands:"
+echo "  uname -a"
+echo "  cat /etc/os-release"
+echo "  ls /"
+echo "  dmesg"
+echo "  poweroff -f"
+echo "  reboot -f"
+
+echo
+
+exec setsid cttyhack /bin/sh
