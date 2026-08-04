@@ -1,0 +1,15 @@
+[profile]
+id = "toolchain-alpha1"
+name = "Veyr Toolchain Alpha 1"
+status = "active"
+description = "Cross Binutils, GCC pass 1, Linux API headers and bootstrap Glibc"
+parent = ""
+packages = [
+  "binutils-cross",
+  "gmp-source",
+  "mpfr-source",
+  "mpc-source",
+  "gcc-cross",
+  "linux-headers",
+  "glibc-bootstrap",
+]

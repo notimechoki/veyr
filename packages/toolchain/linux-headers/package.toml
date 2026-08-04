@@ -1,0 +1,19 @@
+[package]
+name = "linux-headers"
+version = "7.1.5"
+category = "toolchain"
+description = "Sanitized Linux API headers for the Veyr sysroot"
+dependencies = ["gcc-cross"]
+required_commands = ["make", "find", "cp"]
+outputs = [
+  "out/sysroot/usr/include/linux/kernel.h",
+  "out/sysroot/usr/include/asm-generic/unistd.h",
+]
+
+[source]
+url = "https://cdn.kernel.org/pub/linux/kernel/v7.x/linux-7.1.5.tar.xz"
+archive = "linux-7.1.5.tar.xz"
+sha256 = "22a0196b3cbcdf34dc27b77561f4d040585fd3447edc9ab3531a1ac79e3041e7"
+
+[build]
+script = "build.sh"

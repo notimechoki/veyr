@@ -1,10 +1,10 @@
 # Veyr Roadmap
 
-Veyr is an independent Linux distribution project built from upstream components.
-The long-term architecture is based on a shared **Veyr Base** with two editions on top of it:
+Veyr is an independent Linux distribution built from upstream components.
+Both future editions share one common **Veyr Base**:
 
 - **Veyr Desktop** — for everyday users.
-- **Veyr Developer** — for programmers and development workflows.
+- **Veyr Developer** — for development workflows.
 
 ---
 
@@ -12,256 +12,176 @@ The long-term architecture is based on a shared **Veyr Base** with two editions 
 
 Status: **done**
 
-### Goals
-
-- Build a bootable ISO.
-- Build the Linux kernel from upstream sources.
-- Use a static BusyBox bootstrap userspace.
-- Boot successfully in QEMU/KVM.
-- Establish the initial repository structure.
-
-### Result
-
-Veyr can boot into a minimal bootstrap shell and prove the first independent build pipeline works.
+- Bootable ISO.
+- Upstream Linux kernel.
+- Static BusyBox initramfs.
+- GRUB boot menu.
+- QEMU/KVM workflow.
 
 ---
 
 ## 0.0.2 — Forge prototype
 
-Status: **done / active transition point**
+Status: **done**
 
-### Goals
-
-- Introduce **Veyr Forge**.
-- Move from hardcoded build scripts to declarative manifests.
-- Add package manifests via `package.toml`.
-- Add profile manifests via `profile.toml`.
-- Add package dependency graph resolution.
-- Add SHA-256 source verification.
-- Add build output validation.
-- Add simple build cache / fingerprints.
-- Rebuild the bootstrap image through Forge.
-
-### Result
-
-The bootstrap image is no longer just a set of standalone scripts — it is now orchestrated by Veyr Forge.
-This creates the foundation needed for the real base-system work.
+- Veyr Forge CLI.
+- `package.toml` manifests.
+- `profile.toml` manifests.
+- Dependency ordering.
+- Source download and SHA-256 verification.
+- Build output validation.
+- Build fingerprints/cache.
+- Image orchestration.
 
 ---
 
-## 0.1 — Veyr Base
+# 0.1 — Veyr Base
 
-Status: **next major milestone**
+Status: **in development**
 
-### Goal
+The `0.1` milestone is intentionally split into internal alpha stages. The public `0.1.0` milestone is reached only after the real base userspace is complete and bootable.
 
-Replace the temporary BusyBox-only userspace with a real self-hosting base system.
+## 0.1.0-alpha.1 — Cross Toolchain
 
-### Planned work
+Status: **current**
 
-#### Bootstrap toolchain
+Goals:
 
-- Binutils pass 1
-- GCC pass 1
-- Linux API headers
-- Glibc
-- Temporary toolchain
-- Final toolchain validation
+- Binutils 2.47 cross tools.
+- GCC 16.1.0 pass 1.
+- GMP 6.3.0 sources for GCC.
+- MPFR 4.2.2 sources for GCC.
+- MPC 1.4.1 sources for GCC.
+- Linux 7.1.5 API headers.
+- Glibc 2.44 bootstrap installation.
+- Veyr target triplet: `x86_64-veyr-linux-gnu`.
+- Linker/sysroot sanity checks.
+- Execute a dynamically linked Veyr test binary inside QEMU/KVM.
 
-#### Core userspace
+Deliverable:
 
-- Bash
-- Coreutils
-- Diffutils
-- Findutils
-- Gawk
-- Grep
-- Gzip
-- Make
-- Patch
-- Sed
-- Tar
-- Xz
+```text
+out/sysroot/tools/bin/x86_64-veyr-linux-gnu-gcc
+out/sysroot/usr/include/
+out/sysroot/usr/lib/libc.so.6
+out/sysroot/usr/lib/ld-linux-x86-64.so.2
+```
 
-#### Base system utilities
+The image still uses static BusyBox as PID 1 / shell. Its purpose is to prove the new Veyr toolchain and Glibc work at runtime.
 
-- Util-linux
-- Kmod
-- E2fsprogs
-- OpenSSL
-- Curl
-- Procps or equivalent tools where needed
+## 0.1.0-alpha.2 — Temporary userspace
 
-#### Init / system management
+Planned:
 
-- Systemd
-- D-Bus
+- Libstdc++ temporary build.
+- M4.
+- Ncurses.
+- Bash.
+- Coreutils.
+- Diffutils.
+- File.
+- Findutils.
+- Gawk.
+- Grep.
+- Gzip.
+- Make.
+- Patch.
+- Sed.
+- Tar.
+- Xz.
+- Binutils pass 2.
+- GCC pass 2.
 
-### Deliverable
+Goal: create enough Veyr-native temporary tooling to stop depending on the Fedora userspace during later system construction.
 
-A first real **Veyr Base** able to move beyond a temporary BusyBox-only bootstrap environment.
+## 0.1.0-alpha.3 — Final base userspace
+
+Planned:
+
+- Controlled chroot build stage.
+- Final Glibc.
+- Final Binutils/GCC.
+- Bash and Coreutils as real Veyr userspace.
+- Util-linux.
+- Kmod.
+- E2fsprogs.
+- Procps.
+- D-Bus.
+- Systemd.
+- Essential `/etc` configuration.
+
+Goal: boot a real Veyr Base userspace instead of the BusyBox bootstrap shell.
+
+## 0.1.0 — Veyr Base
+
+Planned release criteria:
+
+- Real Glibc userspace.
+- Bash/Coreutils environment.
+- Systemd as init/system manager.
+- Veyr can boot in QEMU without relying on BusyBox as the primary userspace.
+- Build pipeline reproducibly reconstructs the base from pinned upstream sources.
 
 ---
 
 ## 0.2 — Package artifacts and repository groundwork
 
-### Planned work
-
-- Decide final package artifact strategy.
-- Generate structured package outputs.
-- Add local repository metadata generation.
-- Add package signing groundwork.
-- Prepare the basis for system updates.
-
-### Deliverable
-
-A more realistic internal package distribution model for Veyr.
+- Binary package strategy.
+- Package metadata database.
+- Repository generation.
+- Signing groundwork.
+- Update architecture groundwork.
 
 ---
 
 ## 0.3 — Persistent installation
 
-### Planned work
-
-- Support installation to a virtual disk.
-- Partitioning and filesystem layout.
+- Virtual disk installation.
+- GPT/UEFI layout.
 - Persistent root filesystem.
-- Bootloader installation to installed system.
-- Booting the installed system after reboot.
-
-### Deliverable
-
-Veyr no longer lives only inside a transient bootstrap image.
+- Bootloader installation.
+- Boot installed Veyr after removing the ISO.
 
 ---
 
-## 0.4 — Networking and hardware base
+## 0.4 — Hardware/network base
 
-### Planned work
-
-- Firmware handling
-- Network stack setup
-- NetworkManager
-- Bluetooth base
-- Audio stack groundwork
-- Graphics stack groundwork
-
-### Deliverable
-
-A usable non-graphical system with a more realistic hardware base.
+- Firmware.
+- Networking.
+- NetworkManager.
+- Bluetooth.
+- PipeWire/WirePlumber.
+- Mesa/Wayland graphics groundwork.
 
 ---
 
-## 0.5 — Veyr Desktop foundation
+## 0.5 — Veyr Desktop
 
-### Planned work
-
-- KDE Plasma integration
-- SDDM or equivalent display manager
-- Dolphin, Konsole, Discover
-- Flatpak / Flathub integration
-- First desktop-level branding
-- User-friendly defaults
-
-### Desktop design goal
-
-The experience should be easy for people coming from Windows:
-
-- familiar taskbar workflow,
-- clean visuals,
-- minimal need for terminal usage,
-- graphical software installation,
-- graphical updates.
-
-### Deliverable
-
-The first recognizable **Veyr Desktop** image.
+- KDE Plasma.
+- Familiar Windows-style interaction model with original Veyr visuals.
+- Graphical settings.
+- Graphical application installation.
+- Flatpak integration.
+- Graphical updates.
 
 ---
 
-## 0.6 — GUI software and update experience
+## 0.6+ — Installer, updates and desktop hardening
 
-### Planned work
-
-- Brand the software center experience
-- Improve graphical update flow
-- Prepare rollback-friendly update design
-- Improve out-of-box usability
-
-### Deliverable
-
-A more consumer-friendly daily-driver direction.
-
----
-
-## 0.7 — Installer and live image
-
-### Planned work
-
-- Live boot mode
-- Graphical installer
-- Language, keyboard and disk selection
-- User creation
-- First-install experience
-
-### Deliverable
-
-A real installable desktop distro workflow.
+- Live image.
+- Graphical installer.
+- Btrfs snapshot/rollback design.
+- Signed update flow.
+- Hardware compatibility work.
 
 ---
 
 ## 1.0 — Veyr Desktop stable
 
-### Goal
-
-The first public stable milestone focused on non-technical users.
-
-### Requirements
-
-- installable,
-- bootable,
-- updateable,
-- reasonably stable in virtual machines,
-- easy to understand,
-- no mandatory terminal usage for normal desktop tasks.
+Goal: an installable, updateable daily desktop for non-technical users where normal tasks do not require the terminal.
 
 ---
 
 ## 1.x — Veyr Developer
 
-### Goal
-
-Build a development-focused edition on top of the shared **Veyr Base**.
-
-### Planned direction
-
-- shared Veyr Base with Desktop,
-- development packages and tooling,
-- optional Hyprland or advanced desktop workflow,
-- Git / Python / Node / Go / Rust / Docker / Podman,
-- development-oriented defaults and shortcuts.
-
----
-
-## Guiding principles
-
-### 1. Independent distribution
-
-Veyr should be built from upstream components rather than themed from an existing parent distro.
-
-### 2. Shared base
-
-Desktop and Developer editions must share the same core system.
-
-### 3. Good UX
-
-Veyr Desktop should be comfortable even for users moving from Windows.
-
-### 4. Minimal unnecessary complexity
-
-The project should avoid reinventing everything at once.
-Use upstream components wisely and build the distro architecture step by step.
-
-### 5. Reproducibility
-
-Builds should become more structured, predictable and reproducible over time.
+Built on the same Veyr Base with development tooling, advanced workflow defaults, and an optional developer-oriented desktop environment.

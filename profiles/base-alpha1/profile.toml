@@ -1,0 +1,19 @@
+[profile]
+id = "base-alpha1"
+name = "Veyr Base Alpha 1"
+status = "active"
+description = "Cross-toolchain runtime validation image"
+parent = "toolchain-alpha1"
+packages = [
+  "busybox",
+  "linux"
+]
+
+[image]
+steps = [
+  "scripts/build-toolchain-test.sh",
+  "scripts/build-alpha1-initramfs.sh",
+  "scripts/build-alpha1-iso.sh",
+]
+
+run = "scripts/run-alpha1-qemu.sh"

@@ -1,0 +1,28 @@
+[package]
+name = "glibc-bootstrap"
+version = "2.44"
+category = "toolchain"
+description = "Bootstrap GNU C Library installed into the Veyr sysroot"
+dependencies = [
+  "gcc-cross",
+  "linux-headers"
+]
+required_commands = [
+  "make",
+  "sed",
+  "gawk",
+  "bison"
+]
+outputs = [
+  "out/sysroot/usr/lib/libc.so.6",
+  "out/sysroot/usr/lib/ld-linux-x86-64.so.2",
+  "out/sysroot/usr/bin/ldd",
+]
+
+[source]
+url = "https://ftpmirror.gnu.org/glibc/glibc-2.44.tar.xz"
+archive = "glibc-2.44.tar.xz"
+sha256 = "37f600f2bef3c5e8300147059568b2a2e40a7ad6ccc65ce942556d49429cc667"
+
+[build]
+script = "build.sh"

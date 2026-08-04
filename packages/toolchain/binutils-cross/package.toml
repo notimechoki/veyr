@@ -1,0 +1,19 @@
+[package]
+name = "binutils-cross"
+version = "2.47"
+category = "toolchain"
+description = "Veyr cross assembler, linker and binary utilities"
+dependencies = []
+required_commands = ["gcc", "make", "sed"]
+outputs = [
+  "out/sysroot/tools/bin/x86_64-veyr-linux-gnu-ld",
+  "out/sysroot/tools/bin/x86_64-veyr-linux-gnu-as",
+]
+
+[source]
+url = "https://sourceware.org/pub/binutils/releases/binutils-2.47.tar.xz"
+archive = "binutils-2.47.tar.xz"
+sha256 = "154ab23b60070e8f27013c22977f1129425d67d1e8acd6e13010e617811e4cff"
+
+[build]
+script = "build.sh"

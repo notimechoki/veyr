@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 .PHONY: all
-all: image
+all: alpha1
 
 .PHONY: deps
 deps:
@@ -19,11 +19,15 @@ list:
 
 .PHONY: graph
 graph:
+	./veyr graph base-alpha1
+
+.PHONY: bootstrap-graph
+bootstrap-graph:
 	./veyr graph bootstrap
 
 .PHONY: fetch
 fetch:
-	./veyr fetch --profile bootstrap
+	./veyr fetch --profile base-alpha1
 
 .PHONY: busybox
 busybox:
@@ -33,17 +37,33 @@ busybox:
 kernel:
 	./veyr build linux
 
-.PHONY: build
-build:
-	./veyr build --profile bootstrap
-
-.PHONY: image
-image:
+.PHONY: bootstrap
+bootstrap:
 	./veyr image bootstrap
+
+.PHONY: bootstrap-run
+bootstrap-run:
+	./veyr run bootstrap
+
+.PHONY: toolchain
+toolchain:
+	./veyr build --profile toolchain-alpha1
+
+.PHONY: toolchain-test
+toolchain-test:
+	./scripts/build-toolchain-test.sh
+
+.PHONY: alpha1
+alpha1:
+	./veyr image base-alpha1
 
 .PHONY: run
 run:
-	./veyr run bootstrap
+	./veyr run base-alpha1
+
+.PHONY: run-alpha1
+run-alpha1:
+	./veyr run base-alpha1
 
 .PHONY: clean
 clean:

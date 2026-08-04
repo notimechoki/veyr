@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-echo "Installing Veyr Forge and bootstrap build dependencies..."
+echo "Installing Veyr build, Forge and cross-toolchain dependencies..."
 
 sudo dnf install -y \
     python3 \
@@ -12,8 +12,16 @@ sudo dnf install -y \
     bc \
     bison \
     flex \
+    gawk \
+    m4 \
     perl \
     patch \
+    sed \
+    diffutils \
+    findutils \
+    gettext \
+    texinfo \
+    which \
     git \
     curl \
     wget \
@@ -35,7 +43,5 @@ sudo dnf install -y \
     qemu-ui-gtk
 
 echo
-
-echo "Veyr build dependencies installed."
-
+echo "Veyr host dependencies installed."
 echo "Run './veyr doctor' to verify the host."

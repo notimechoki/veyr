@@ -5,13 +5,15 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
 
-ISO_FILE="${OUT_DIR}/images/bootstrap/Veyr-${VEYR_VERSION}-bootstrap-x86_64.iso"
+IMAGE_PROFILE="${1:-bootstrap}"
+
+ISO_FILE="${OUT_DIR}/images/${IMAGE_PROFILE}/Veyr-${VEYR_VERSION}-${IMAGE_PROFILE}-x86_64.iso"
 
 [[ -f "${ISO_FILE}" ]] \
-    || die "Veyr ISO not found. Run: ./veyr image bootstrap"
+    || die "Veyr ISO not found for ${IMAGE_PROFILE}. Build the profile image first."
 
 QEMU_ARGS=(
-    -name "Veyr ${VEYR_VERSION} Bootstrap"
+    -name "Veyr ${VEYR_VERSION} ${IMAGE_PROFILE}"
     -m 2048
     -smp 2
     -cdrom "${ISO_FILE}"
@@ -39,6 +41,6 @@ else
 
 fi
 
-log "Starting Veyr ${VEYR_VERSION}"
+log "Starting Veyr ${VEYR_VERSION} ${IMAGE_PROFILE}"
 
 exec qemu-system-x86_64 "${QEMU_ARGS[@]}"

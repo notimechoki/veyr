@@ -25,24 +25,47 @@ clear
 cat /etc/motd
 
 echo
+printf 'Image profile: '
+cat /etc/veyr-image-profile 2>/dev/null || echo unknown
+
+echo
 echo "System information:"
 echo "-------------------"
 echo "Hostname: $(hostname)"
 echo "Kernel:   $(uname -r)"
 echo "Arch:     $(uname -m)"
 
+if [ -x /usr/bin/veyr-toolchain-test ]; then
+
+    echo
+    echo "Cross-toolchain runtime verification:"
+    echo "-------------------------------------"
+
+    if /usr/bin/veyr-toolchain-test; then
+        echo "Runtime verification result: PASS"
+    else
+        status=$?
+        echo "Runtime verification result: FAIL (${status})"
+    fi
+fi
+
 echo
-echo "Veyr bootstrap environment is running."
+echo "Veyr development environment is running."
 echo
 
 echo "Useful commands:"
 echo "  uname -a"
 echo "  cat /etc/os-release"
+echo "  cat /etc/veyr-image-profile"
 echo "  ls /"
 echo "  dmesg"
+
+if [ -x /usr/bin/veyr-toolchain-test ]; then
+    echo "  /usr/bin/veyr-toolchain-test"
+fi
+
 echo "  poweroff -f"
 echo "  reboot -f"
-
 echo
 
 exec setsid cttyhack /bin/sh

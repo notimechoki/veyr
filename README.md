@@ -5,67 +5,200 @@
 <p align="center"><strong>An independent Linux distribution built from upstream components.</strong></p>
 
 <p align="center">
-  <em>Current stage: Bootstrap + Forge prototype</em>
+  <em>Current development stage: Veyr Base 0.1.0-alpha.1 — Cross Toolchain</em>
 </p>
 
 ---
 
 ## About
 
-**Veyr** is a personal Linux distribution project focused on building a fully independent system from upstream components instead of using Fedora, Ubuntu, or Arch as a base.
+**Veyr** is an independent Linux distribution project built from upstream components instead of using Fedora, Ubuntu, Arch, or another distribution as its runtime base.
 
-The long-term goal is to develop a shared **Veyr Base** and ship two editions on top of it:
+The long-term architecture consists of one shared **Veyr Base** and two editions:
 
-- **Veyr Desktop** — a polished, user-friendly edition for everyday users.
-- **Veyr Developer** — a development-focused edition with tools and workflows for programmers.
+- **Veyr Desktop** — a polished, graphical edition for everyday users.
+- **Veyr Developer** — a development-focused edition built on the same base.
 
-Right now the project is in the **bootstrap** phase and already includes:
-
-- a bootable ISO,
-- an upstream Linux kernel build,
-- a static BusyBox bootstrap userspace,
-- a custom build orchestrator called **Veyr Forge**,
-- package manifests and profile manifests,
-- QEMU/KVM testing workflow.
+Fedora is currently used only as the build host.
 
 ---
 
-## Current status
+## Milestones
 
-### Released milestones
+- **0.0.1** — bootable Linux + static BusyBox bootstrap image.
+- **0.0.2** — Veyr Forge prototype with package/profile manifests and build orchestration.
+- **0.1.0-alpha.1** — cross Binutils + cross GCC + Linux API headers + bootstrap Glibc validation.
 
-- **0.0.1** — bootstrap proof of concept
-- **0.0.2** — Forge prototype
-
-### Current profile
-
-The active image profile right now is:
-
-- **bootstrap** — minimal development image used to validate the Veyr build pipeline.
-
-Planned profiles:
-
-- **base**
-- **desktop**
-- **developer**
+The original `bootstrap` profile remains available as a known-good recovery/control image while Veyr Base is being developed.
 
 ---
 
-## Repository structure
+## Current architecture
+
+```text
+Fedora build host
+      |
+      v
+Veyr Forge
+      |
+      +--> Binutils cross
+      +--> GCC pass 1
+      +--> Linux API headers
+      +--> Glibc bootstrap
+      |
+      v
+out/sysroot
+      |
+      +--> toolchain sanity test
+      |
+      v
+Veyr base-alpha1 initramfs
+      |
+      v
+QEMU/KVM
+```
+
+Target triplet:
+
+```text
+x86_64-veyr-linux-gnu
+```
+
+---
+
+## Requirements
+
+The current supported build host is Fedora Linux on x86_64.
+
+Install host dependencies:
+
+```bash
+make deps
+```
+
+Verify them:
+
+```bash
+./veyr doctor
+```
+
+---
+
+## Build Veyr Base alpha.1
+
+Inspect the dependency graph:
+
+```bash
+./veyr graph base-alpha1
+```
+
+Build the full image:
+
+```bash
+./veyr image base-alpha1
+```
+
+Or:
+
+```bash
+make alpha1
+```
+
+The build produces a Veyr sysroot under:
+
+```text
+out/sysroot/
+```
+
+and the alpha image under:
+
+```text
+out/images/base-alpha1/
+```
+
+---
+
+## Run in QEMU/KVM
+
+```bash
+./veyr run base-alpha1
+```
+
+or:
+
+```bash
+make run
+```
+
+During boot, the initramfs automatically runs a dynamically linked program produced by the Veyr cross compiler. A successful result contains:
+
+```text
+Veyr cross-toolchain userspace test: OK
+Runtime verification result: PASS
+```
+
+This verifies that a Veyr-built program can load using the bootstrap Veyr Glibc inside the VM.
+
+---
+
+## Keep testing the old bootstrap
+
+The previous minimal image is intentionally preserved:
+
+```bash
+./veyr image bootstrap
+./veyr run bootstrap
+```
+
+This is useful for catching regressions in the image pipeline independently of the new toolchain.
+
+---
+
+## Useful Forge commands
+
+```bash
+./veyr --version
+./veyr list packages
+./veyr list profiles
+./veyr info profile base-alpha1
+./veyr graph base-alpha1
+./veyr fetch --profile base-alpha1
+./veyr build binutils-cross
+./veyr build gcc-cross
+./veyr build linux-headers
+./veyr build glibc-bootstrap
+./veyr build --profile base-alpha1
+./veyr image base-alpha1
+./veyr run base-alpha1
+./veyr clean
+```
+
+Force a rebuild when changing a lower-level toolchain dependency:
+
+```bash
+./veyr image base-alpha1 --rebuild
+```
+
+---
+
+## Repository layout
 
 ```text
 veyr/
+├── assets/
 ├── config/
 ├── docs/
 ├── initramfs/
 ├── iso/
 ├── packages/
 │   ├── core/
+│   ├── toolchain/
 │   ├── desktop/
 │   └── developer/
 ├── profiles/
 ├── rootfs/
 ├── scripts/
+├── tests/
 ├── tools/
 │   └── forge/
 ├── build/
@@ -76,187 +209,12 @@ veyr/
 
 ---
 
-## Key concepts
-
-### Veyr Forge
-
-**Veyr Forge** is the custom build orchestration tool for Veyr.
-
-It currently supports:
-
-- declarative `package.toml` manifests,
-- declarative `profile.toml` manifests,
-- package dependency graph resolution,
-- source downloading,
-- SHA-256 verification,
-- source extraction,
-- package build orchestration,
-- build output validation,
-- simple build cache/fingerprints,
-- bootstrap image assembly.
-
----
-
-## Build requirements
-
-The current build host is **Fedora Linux**.
-
-Recommended packages are installed via:
-
-```bash
-make deps
-```
-
-Then verify the host:
-
-```bash
-./veyr doctor
-```
-
----
-
-## Quick start
-
-### 1. Install host dependencies
-
-```bash
-make deps
-```
-
-### 2. Check the build environment
-
-```bash
-./veyr doctor
-```
-
-### 3. Inspect packages and profiles
-
-```bash
-./veyr list packages
-./veyr list profiles
-./veyr graph bootstrap
-```
-
-### 4. Build the bootstrap image
-
-```bash
-./veyr image bootstrap
-```
-
-### 5. Run it in QEMU/KVM
-
-```bash
-./veyr run bootstrap
-```
-
----
-
-## Useful commands
-
-### Show version
-
-```bash
-./veyr --version
-```
-
-### Show package info
-
-```bash
-./veyr info package linux
-./veyr info package busybox
-```
-
-### Show profile info
-
-```bash
-./veyr info profile bootstrap
-```
-
-### Download sources only
-
-```bash
-./veyr fetch --profile bootstrap
-```
-
-### Build specific packages
-
-```bash
-./veyr build busybox
-./veyr build linux
-```
-
-### Force rebuild
-
-```bash
-./veyr image bootstrap --rebuild
-```
-
-### Clean generated artifacts
-
-```bash
-./veyr clean
-```
-
-### Clean everything including sources
-
-```bash
-./veyr clean --sources
-```
-
----
-
-## Output locations
-
-### Package outputs
-
-```text
-out/packages/busybox/
-out/packages/linux/
-```
-
-### Image outputs
-
-```text
-out/images/bootstrap/
-├── initramfs.img
-└── Veyr-<version>-bootstrap-x86_64.iso
-```
-
----
-
-## Testing workflow
-
-At the current stage, Veyr is tested in **QEMU/KVM**.
-
-Recommended testing loop:
-
-1. build the image,
-2. boot it in QEMU,
-3. verify the shell starts,
-4. run:
-   - `uname -a`
-   - `cat /etc/os-release`
-   - `ps`
-   - `dmesg`
-5. power off and iterate.
-
-Later stages will add:
-
-- persistent installation,
-- virtual disk testing,
-- upgrade testing,
-- hardware testing.
-
----
-
 ## Roadmap
 
-See: [`docs/ROADMAP.md`](docs/ROADMAP.md)
+See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ---
 
 ## License
 
-MIT License.
-
----
+Veyr project tooling, scripts, manifests and documentation are published under the MIT License unless noted otherwise. Upstream components retain their own licenses.
