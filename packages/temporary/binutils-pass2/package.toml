@@ -1,0 +1,22 @@
+[package]
+name = "binutils-pass2"
+version = "2.47"
+category = "temporary"
+description = "Temporary target Binutils installed into /usr"
+dependencies = ["xz-temporary"]
+required_commands = ["make", "sed"]
+outputs = [
+  "out/sysroot/usr/bin/ld",
+  "out/sysroot/usr/bin/as",
+]
+
+[source]
+urls = [
+  "https://sourceware.org/pub/binutils/releases/binutils-2.47.tar.xz",
+  "https://ftp.gnu.org/gnu/binutils/binutils-2.47.tar.xz",
+]
+archive = "binutils-2.47.tar.xz"
+sha256 = "154ab23b60070e8f27013c22977f1129425d67d1e8acd6e13010e617811e4cff"
+
+[build]
+script = "build.sh"

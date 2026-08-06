@@ -11,15 +11,25 @@ source "${VEYR_ROOT}/config/toolchain.env"
 
 VEYR_SYSROOT="${VEYR_ROOT}/out/sysroot"
 VEYR_TOOLS="${VEYR_SYSROOT}/tools"
+VEYR_CONFIG_SITE="${VEYR_SYSROOT}/usr/share/config.site"
 
 export VEYR_TARGET
 export VEYR_SYSROOT
 export VEYR_TOOLS
-export LC_ALL=POSIX
+export VEYR_CONFIG_SITE
 
+export LC_ALL=POSIX
 export PATH="${VEYR_TOOLS}/bin:${PATH}"
 
 umask 022
+
+enable_veyr_config_site() {
+    if [[ -f "${VEYR_CONFIG_SITE}" ]]; then
+        export CONFIG_SITE="${VEYR_CONFIG_SITE}"
+    else
+        unset CONFIG_SITE || true
+    fi
+}
 
 ensure_veyr_layout() {
     mkdir -p \
@@ -29,6 +39,7 @@ ensure_veyr_layout() {
         "${VEYR_SYSROOT}/usr/lib" \
         "${VEYR_SYSROOT}/usr/sbin" \
         "${VEYR_SYSROOT}/usr/include" \
+        "${VEYR_SYSROOT}/usr/share" \
         "${VEYR_SYSROOT}/tools" \
         "${VEYR_SYSROOT}/lib64"
 
@@ -43,7 +54,6 @@ ensure_root_link() {
     local path="${VEYR_SYSROOT}/${name}"
 
     if [[ -L "${path}" ]]; then
-
         local current
         current="$(readlink "${path}")"
 
@@ -68,6 +78,15 @@ require_cross_tool() {
 
     command -v "${VEYR_TARGET}-${tool}" >/dev/null 2>&1 || {
         echo "Missing Veyr cross tool: ${VEYR_TARGET}-${tool}" >&2
+        exit 1
+    }
+}
+
+require_sysroot_file() {
+    local relative="$1"
+
+    [[ -e "${VEYR_SYSROOT}/${relative}" ]] || {
+        echo "Missing Veyr sysroot file: ${relative}" >&2
         exit 1
     }
 }

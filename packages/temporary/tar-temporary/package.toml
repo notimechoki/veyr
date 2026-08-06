@@ -1,0 +1,21 @@
+[package]
+name = "tar-temporary"
+version = "1.35"
+category = "temporary"
+description = "GNU Tar temporary archive utility"
+dependencies = ["sed-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/tar",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/tar/tar-1.35.tar.xz",
+  "https://ftp.gnu.org/gnu/tar/tar-1.35.tar.xz",
+]
+archive = "tar-1.35.tar.xz"
+sha256 = "4d62ff37342ec7aed748535323930c7cf94acf71c3591882b26a7ea50f3edc16"
+
+[build]
+script = "build.sh"

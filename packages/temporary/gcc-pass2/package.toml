@@ -1,0 +1,24 @@
+[package]
+name = "gcc-pass2"
+version = "16.1.0"
+category = "temporary"
+description = "Temporary target GCC pass 2 installed into /usr"
+dependencies = ["binutils-pass2", "gmp-source", "mpfr-source", "mpc-source", "libstdcxx-pass1"]
+required_commands = ["gcc", "g++", "make", "sed"]
+outputs = [
+  "out/sysroot/usr/bin/gcc",
+  "out/sysroot/usr/bin/g++",
+  "out/sysroot/usr/bin/cc",
+  "out/sysroot/usr/lib/libstdc++.so",
+]
+
+[source]
+urls = [
+  "https://gcc.gnu.org/ftp/gcc/releases/gcc-16.1.0/gcc-16.1.0.tar.xz",
+  "https://ftp.gnu.org/gnu/gcc/gcc-16.1.0/gcc-16.1.0.tar.xz",
+]
+archive = "gcc-16.1.0.tar.xz"
+sha256 = "50efb4d94c3397aff3b0d61a5abd748b4dd31d9d3f2ab7be05b171d36a510f79"
+
+[build]
+script = "build.sh"

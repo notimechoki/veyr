@@ -1,0 +1,21 @@
+[package]
+name = "file-temporary"
+version = "5.48"
+category = "temporary"
+description = "File temporary utility and libmagic"
+dependencies = ["diffutils-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/file",
+  "out/sysroot/usr/lib/libmagic.so",
+]
+
+[source]
+urls = [
+  "https://astron.com/pub/file/file-5.48.tar.gz",
+]
+archive = "file-5.48.tar.gz"
+sha256 = "ed14656883b23a364b4057c05595d93252da9bc473d30106519519d0da141283"
+
+[build]
+script = "build.sh"

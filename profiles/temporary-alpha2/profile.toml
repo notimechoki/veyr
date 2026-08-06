@@ -1,0 +1,26 @@
+[profile]
+id = "temporary-alpha2"
+name = "Veyr Temporary Userspace Alpha 2"
+status = "active"
+description = "Temporary Veyr-native build tools used before the final chroot stage"
+parent = "toolchain-alpha1"
+packages = [
+  "libstdcxx-pass1",
+  "m4-temporary",
+  "ncurses-temporary",
+  "bash-temporary",
+  "coreutils-temporary",
+  "diffutils-temporary",
+  "file-temporary",
+  "findutils-temporary",
+  "gawk-temporary",
+  "grep-temporary",
+  "gzip-temporary",
+  "make-temporary",
+  "patch-temporary",
+  "sed-temporary",
+  "tar-temporary",
+  "xz-temporary",
+  "binutils-pass2",
+  "gcc-pass2",
+]

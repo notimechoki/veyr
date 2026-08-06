@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-echo "Installing Veyr build, Forge and cross-toolchain dependencies..."
+echo "Installing Veyr build, Forge and temporary-userspace dependencies..."
 
 sudo dnf install -y \
     python3 \

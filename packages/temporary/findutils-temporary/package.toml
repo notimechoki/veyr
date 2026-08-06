@@ -1,0 +1,22 @@
+[package]
+name = "findutils-temporary"
+version = "4.11.0"
+category = "temporary"
+description = "GNU Findutils temporary tools"
+dependencies = ["file-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/find",
+  "out/sysroot/usr/bin/xargs",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/findutils/findutils-4.11.0.tar.xz",
+  "https://ftp.gnu.org/gnu/findutils/findutils-4.11.0.tar.xz",
+]
+archive = "findutils-4.11.0.tar.xz"
+sha256 = "bfd19cb06cc71f3352d567e90284d8cdac02ac89774bbeadf0b533b0c11432fd"
+
+[build]
+script = "build.sh"

@@ -1,0 +1,22 @@
+[package]
+name = "coreutils-temporary"
+version = "9.11"
+category = "temporary"
+description = "GNU Coreutils temporary base utilities"
+dependencies = ["bash-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/ls",
+  "out/sysroot/usr/sbin/chroot",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/coreutils/coreutils-9.11.tar.xz",
+  "https://ftp.gnu.org/gnu/coreutils/coreutils-9.11.tar.xz",
+]
+archive = "coreutils-9.11.tar.xz"
+sha256 = "394024eda0a5955217ceda9cd1201e65dc8fa3aa29c2951135a49521d57c3cc3"
+
+[build]
+script = "build.sh"

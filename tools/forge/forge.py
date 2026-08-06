@@ -127,7 +127,7 @@ class Package:
     required_commands: tuple[str, ...]
     outputs: tuple[Path, ...]
 
-    source_url: str
+    source_urls: tuple[str, ...]
     source_archive: str
     source_sha256: str
 
@@ -299,11 +299,13 @@ class Forge:
                     )
                 ),
                 outputs=outputs,
-                source_url=str(
-                    source_data.get(
-                        "url",
-                        "",
+                source_urls=tuple(
+                    str(item)
+                    for item in (
+                        source_data.get("urls")
+                        or [source_data.get("url", "")]
                     )
+                    if str(item).strip()
                 ),
                 source_archive=str(
                     source_data.get(
@@ -423,6 +425,11 @@ class Forge:
 
     def _validate_references(self) -> None:
         for package in self.packages.values():
+            if not package.source_urls:
+                fail(
+                    f"Package {package.name} has no source URL"
+                )
+
             for dependency in package.dependencies:
                 if dependency not in self.packages:
                     fail(
@@ -723,9 +730,10 @@ class Forge:
             f"{package.manifest.relative_to(ROOT)}"
         )
 
-        print(
-            f"Source:       {package.source_url}"
-        )
+        print("Sources:")
+
+        for source_url in package.source_urls:
+            print(f"  - {source_url}")
 
         print(
             f"Archive:      {package.source_archive}"
@@ -897,76 +905,110 @@ class Forge:
             f"{package.version}"
         )
 
-        request = urllib.request.Request(
-            package.source_url,
-            headers={
-                "User-Agent":
-                    f"Veyr-Forge/{self.version}"
-            },
-        )
-
         temporary = destination.with_suffix(
             destination.suffix + ".part"
         )
 
-        temporary.unlink(
-            missing_ok=True
-        )
+        errors: list[str] = []
 
-        try:
-            with (
-                urllib.request.urlopen(
-                    request,
-                    timeout=60,
-                ) as response,
-                temporary.open(
-                    "wb"
-                ) as output,
-            ):
-                shutil.copyfileobj(
-                    response,
-                    output,
+        for index, source_url in enumerate(
+            package.source_urls,
+            start=1,
+        ):
+            temporary.unlink(
+                missing_ok=True
+            )
+
+            if len(package.source_urls) > 1:
+                print(
+                    f"  mirror {index}/"
+                    f"{len(package.source_urls)}: "
+                    f"{source_url}"
                 )
 
-        except Exception as exc:
-            temporary.unlink(
-                missing_ok=True
+            request = urllib.request.Request(
+                source_url,
+                headers={
+                    "User-Agent":
+                        f"Veyr-Forge/{self.version}"
+                },
             )
 
-            fail(
-                "Failed to download "
-                f"{package.source_url}: "
-                f"{exc}"
+            try:
+                with (
+                    urllib.request.urlopen(
+                        request,
+                        timeout=60,
+                    ) as response,
+                    temporary.open(
+                        "wb"
+                    ) as output,
+                ):
+                    shutil.copyfileobj(
+                        response,
+                        output,
+                    )
+
+            except Exception as exc:
+                temporary.unlink(
+                    missing_ok=True
+                )
+
+                errors.append(
+                    f"{source_url}: {exc}"
+                )
+
+                warn(
+                    "Download failed from "
+                    f"{source_url}: {exc}"
+                )
+
+                continue
+
+            actual = sha256_file(
+                temporary
             )
 
-        actual = sha256_file(
-            temporary
+            if actual != package.source_sha256:
+                errors.append(
+                    f"{source_url}: SHA256 mismatch "
+                    f"(got {actual})"
+                )
+
+                warn(
+                    "SHA256 mismatch from "
+                    f"{source_url}"
+                )
+
+                temporary.unlink(
+                    missing_ok=True
+                )
+
+                continue
+
+            temporary.replace(
+                destination
+            )
+
+            ok(
+                "Downloaded and verified "
+                f"{package.source_archive}"
+            )
+
+            return destination
+
+        rendered = "\n".join(
+            f"  - {item}"
+            for item in errors
         )
 
-        if actual != package.source_sha256:
-            temporary.unlink(
-                missing_ok=True
-            )
-
-            fail(
-                "SHA256 mismatch for "
-                f"{package.source_archive}\n"
-                f"Expected: "
-                f"{package.source_sha256}\n"
-                f"Actual:   "
-                f"{actual}"
-            )
-
-        temporary.replace(
-            destination
+        fail(
+            "Unable to obtain a verified source "
+            f"for {package.name}.\n"
+            f"Expected SHA256: "
+            f"{package.source_sha256}\n"
+            f"Attempts:\n{rendered}"
         )
-
-        ok(
-            "Downloaded and verified "
-            f"{package.source_archive}"
-        )
-
-        return destination
 
     def fetch_packages(
         self,
@@ -1043,6 +1085,77 @@ class Forge:
 
         return destination
 
+    def _dependency_fingerprints(
+        self,
+        package: Package,
+    ) -> bytes:
+        data: list[str] = []
+
+        for dependency_name in package.dependencies:
+            dependency = self.package(
+                dependency_name
+            )
+
+            state_file = self._state_file(
+                dependency
+            )
+
+            fingerprint = "missing"
+
+            if state_file.is_file():
+                try:
+                    state = json.loads(
+                        state_file.read_text(
+                            encoding="utf-8"
+                        )
+                    )
+
+                    fingerprint = str(
+                        state.get(
+                            "fingerprint",
+                            "missing",
+                        )
+                    )
+
+                except (
+                    json.JSONDecodeError,
+                    OSError,
+                ):
+                    fingerprint = "invalid"
+
+            data.append(
+                f"{dependency_name}:{fingerprint}"
+            )
+
+        return "\n".join(data).encode(
+            "utf-8"
+        )
+
+    def _support_files_fingerprint(
+        self,
+    ) -> bytes:
+        digest = hashlib.sha256()
+
+        support_dir = ROOT / "scripts" / "lib"
+
+        if support_dir.is_dir():
+            for path in sorted(
+                support_dir.rglob("*.sh")
+            ):
+                digest.update(
+                    str(
+                        path.relative_to(ROOT)
+                    ).encode("utf-8")
+                )
+
+                digest.update(
+                    path.read_bytes()
+                )
+
+        return digest.hexdigest().encode(
+            "ascii"
+        )
+
     def _package_fingerprint(
         self,
         package: Package,
@@ -1057,6 +1170,10 @@ class Forge:
             self.arch.encode(
                 "utf-8"
             ),
+            self._dependency_fingerprints(
+                package
+            ),
+            self._support_files_fingerprint(),
         )
 
     def _state_file(

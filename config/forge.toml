@@ -1,6 +1,6 @@
 [project]
 name = "Veyr"
-format = 1
+format = 2
 architecture = "x86_64"
 min_python = "3.11"
 

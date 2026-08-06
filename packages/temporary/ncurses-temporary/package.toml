@@ -1,0 +1,22 @@
+[package]
+name = "ncurses-temporary"
+version = "6.6"
+category = "temporary"
+description = "Ncurses temporary terminal libraries"
+dependencies = ["m4-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/tic",
+  "out/sysroot/usr/lib/libncursesw.so",
+]
+
+[source]
+urls = [
+  "https://invisible-mirror.net/archives/ncurses/ncurses-6.6.tar.gz",
+  "https://ftp.gnu.org/gnu/ncurses/ncurses-6.6.tar.gz",
+]
+archive = "ncurses-6.6.tar.gz"
+sha256 = "355b4cbbed880b0381a04c46617b7656e362585d52e9cf84a67e2009b749ff11"
+
+[build]
+script = "build.sh"

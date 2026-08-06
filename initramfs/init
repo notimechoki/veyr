@@ -1,10 +1,19 @@
-#!/bin/sh
+#!/usr/libexec/busybox sh
 
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+BB=/usr/libexec/busybox
+
+NORMAL_PATH=/usr/bin:/usr/sbin:/bin:/sbin
+RESCUE_PATH=/rescue-bin:/usr/bin:/usr/sbin:/bin:/sbin
+
+export PATH="${NORMAL_PATH}"
+
+unset LD_LIBRARY_PATH
+
 export HOME=/root
 export TERM=linux
+export SHELL=/usr/bin/bash
 
-mkdir -p \
+"$BB" mkdir -p \
     /dev \
     /proc \
     /sys \
@@ -12,60 +21,144 @@ mkdir -p \
     /tmp \
     /root
 
-mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
-mount -t proc proc /proc
-mount -t sysfs sysfs /sys
-mount -t tmpfs tmpfs /run
-mount -t tmpfs tmpfs /tmp
+"$BB" mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 
-hostname veyr
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+fi
 
-clear
+"$BB" mount -t proc proc /proc 2>/dev/null || \
+    echo "[init] warning: unable to mount /proc"
 
-cat /etc/motd
+"$BB" mount -t sysfs sysfs /sys 2>/dev/null || \
+    echo "[init] warning: unable to mount /sys"
+
+"$BB" mount -t tmpfs tmpfs /run 2>/dev/null || \
+    echo "[init] warning: unable to mount /run"
+
+"$BB" mount -t tmpfs tmpfs /tmp 2>/dev/null || \
+    echo "[init] warning: unable to mount /tmp"
+
+"$BB" chmod 1777 /tmp 2>/dev/null || true
+"$BB" hostname veyr 2>/dev/null || true
+"$BB" clear 2>/dev/null || true
+
+if [ -f /etc/motd ]; then
+    "$BB" cat /etc/motd
+fi
 
 echo
 printf 'Image profile: '
-cat /etc/veyr-image-profile 2>/dev/null || echo unknown
+"$BB" cat /etc/veyr-image-profile 2>/dev/null || echo unknown
 
 echo
 echo "System information:"
 echo "-------------------"
-echo "Hostname: $(hostname)"
-echo "Kernel:   $(uname -r)"
-echo "Arch:     $(uname -m)"
+echo "Hostname: $($BB hostname 2>/dev/null || echo veyr)"
+echo "Kernel:   $($BB uname -r)"
+echo "Arch:     $($BB uname -m)"
 
-if [ -x /usr/bin/veyr-toolchain-test ]; then
+if [ -s /etc/ld.so.cache ]; then
+    echo "Loader cache: present"
+else
+    echo "Loader cache: MISSING"
+fi
 
+ALPHA2_OK=0
+
+if [ -x /usr/lib/veyr-tests/userspace-smoke.sh ]; then
     echo
-    echo "Cross-toolchain runtime verification:"
-    echo "-------------------------------------"
+    echo "Temporary userspace runtime verification:"
+    echo "-----------------------------------------"
 
-    if /usr/bin/veyr-toolchain-test; then
-        echo "Runtime verification result: PASS"
+    if /usr/bin/bash /usr/lib/veyr-tests/userspace-smoke.sh; then
+        echo "Alpha.2 runtime verification: PASS"
+        ALPHA2_OK=1
     else
         status=$?
-        echo "Runtime verification result: FAIL (${status})"
+
+        echo "Alpha.2 runtime verification: FAIL (${status})"
     fi
 fi
 
-echo
-echo "Veyr development environment is running."
-echo
+if [ "${ALPHA2_OK}" -eq 1 ]; then
+    echo
+    echo "Veyr alpha.2 temporary userspace is ready."
+    echo
+    echo "Useful commands:"
+    echo "  uname -a"
+    echo "  cat /etc/os-release"
+    echo "  ls /"
+    echo "  bash --version"
+    echo "  gcc --version"
+    echo "  g++ --version"
+    echo "  make --version"
+    echo "  poweroff -f"
+    echo "  reboot -f"
+    echo
+    echo "[init] Starting Veyr Bash console..."
 
-echo "Useful commands:"
-echo "  uname -a"
-echo "  cat /etc/os-release"
-echo "  cat /etc/veyr-image-profile"
-echo "  ls /"
-echo "  dmesg"
+    /usr/bin/bash \
+        --noprofile \
+        --norc \
+        -i
 
-if [ -x /usr/bin/veyr-toolchain-test ]; then
-    echo "  /usr/bin/veyr-toolchain-test"
+    status=$?
+
+    echo
+    echo "[init] Bash console exited with status ${status}."
+    echo "[init] Entering static rescue mode."
+else
+    echo
+    echo "[init] Normal alpha.2 userspace is unavailable."
+
+    if [ -x /usr/bin/bash ]; then
+        echo "[init] /usr/bin/bash exists but runtime validation failed."
+    else
+        echo "[init] /usr/bin/bash is missing."
+    fi
+
+    if [ -e /lib64/ld-linux-x86-64.so.2 ]; then
+        echo "[init] ELF loader exists at /lib64/ld-linux-x86-64.so.2."
+    else
+        echo "[init] ELF loader is missing at /lib64/ld-linux-x86-64.so.2."
+    fi
+
+    if [ -x /usr/sbin/ldconfig ]; then
+        echo
+        echo "[init] Dynamic loader cache:"
+
+        /usr/sbin/ldconfig -p 2>/dev/null || true
+    fi
+
+    echo
+    echo "[init] Bash dependency diagnostics:"
+
+    /lib64/ld-linux-x86-64.so.2 \
+        --list \
+        /usr/bin/bash \
+        2>&1 \
+        || true
+
+    echo
+    echo "[init] Entering static rescue mode."
 fi
 
-echo "  poweroff -f"
-echo "  reboot -f"
-echo
+export PATH="${RESCUE_PATH}"
+unset LD_LIBRARY_PATH
+export SHELL=/rescue-bin/sh
 
-exec setsid cttyhack /bin/sh
+echo
+echo "Veyr rescue shell (static BusyBox)"
+echo "Normal rescue commands use BusyBox."
+echo "Type 'exit' to restart the rescue shell."
+
+while :; do
+    /rescue-bin/sh -i
+
+    status=$?
+
+    echo "[init] Rescue shell exited with status ${status}; restarting..."
+
+    /rescue-bin/sleep 1
+done

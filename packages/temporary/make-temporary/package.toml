@@ -1,0 +1,21 @@
+[package]
+name = "make-temporary"
+version = "4.4.1"
+category = "temporary"
+description = "GNU Make temporary build tool"
+dependencies = ["gzip-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/make",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/make/make-4.4.1.tar.gz",
+  "https://ftp.gnu.org/gnu/make/make-4.4.1.tar.gz",
+]
+archive = "make-4.4.1.tar.gz"
+sha256 = "dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3"
+
+[build]
+script = "build.sh"

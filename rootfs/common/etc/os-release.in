@@ -1,5 +1,5 @@
 NAME="Veyr"
-PRETTY_NAME="Veyr Linux @VERSION@ Bootstrap"
+PRETTY_NAME="Veyr Linux @VERSION@"
 ID=veyr
 ID_LIKE=
 VERSION="@VERSION@"

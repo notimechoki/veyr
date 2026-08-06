@@ -20,7 +20,10 @@ outputs = [
 ]
 
 [source]
-url = "https://ftpmirror.gnu.org/glibc/glibc-2.44.tar.xz"
+urls = [
+  "https://ftpmirror.gnu.org/glibc/glibc-2.44.tar.xz",
+  "https://ftp.gnu.org/gnu/glibc/glibc-2.44.tar.xz",
+]
 archive = "glibc-2.44.tar.xz"
 sha256 = "37f600f2bef3c5e8300147059568b2a2e40a7ad6ccc65ce942556d49429cc667"
 

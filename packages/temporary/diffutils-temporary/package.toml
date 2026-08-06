@@ -1,0 +1,21 @@
+[package]
+name = "diffutils-temporary"
+version = "3.12"
+category = "temporary"
+description = "GNU Diffutils temporary tools"
+dependencies = ["coreutils-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/diff",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/diffutils/diffutils-3.12.tar.xz",
+  "https://ftp.gnu.org/gnu/diffutils/diffutils-3.12.tar.xz",
+]
+archive = "diffutils-3.12.tar.xz"
+sha256 = "7c8b7f9fc8609141fdea9cece85249d308624391ff61dedaf528fcb337727dfd"
+
+[build]
+script = "build.sh"

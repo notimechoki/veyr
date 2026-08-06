@@ -1,0 +1,21 @@
+[package]
+name = "grep-temporary"
+version = "3.12"
+category = "temporary"
+description = "GNU Grep temporary search tools"
+dependencies = ["gawk-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/grep",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/grep/grep-3.12.tar.xz",
+  "https://ftp.gnu.org/gnu/grep/grep-3.12.tar.xz",
+]
+archive = "grep-3.12.tar.xz"
+sha256 = "2649b27c0e90e632eadcd757be06c6e9a4f48d941de51e7c0f83ff76408a07b9"
+
+[build]
+script = "build.sh"

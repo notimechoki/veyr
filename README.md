@@ -5,7 +5,7 @@
 <p align="center"><strong>An independent Linux distribution built from upstream components.</strong></p>
 
 <p align="center">
-  <em>Current development stage: Veyr Base 0.1.0-alpha.1 — Cross Toolchain</em>
+  <em>Current development stage: Veyr Base 0.1.0-alpha.2 — Temporary Userspace</em>
 </p>
 
 ---
@@ -26,14 +26,15 @@ Fedora is currently used only as the build host.
 ## Milestones
 
 - **0.0.1** — bootable Linux + static BusyBox bootstrap image.
-- **0.0.2** — Veyr Forge prototype with package/profile manifests and build orchestration.
-- **0.1.0-alpha.1** — cross Binutils + cross GCC + Linux API headers + bootstrap Glibc validation.
+- **0.0.2** — Veyr Forge prototype.
+- **0.1.0-alpha.1** — cross Binutils/GCC + Linux API headers + bootstrap Glibc.
+- **0.1.0-alpha.2** — temporary Veyr userspace + pass-2 compiler toolchain.
 
-The original `bootstrap` profile remains available as a known-good recovery/control image while Veyr Base is being developed.
+The original `bootstrap` and `base-alpha1` profiles remain available as regression/control images.
 
 ---
 
-## Current architecture
+## Alpha.2 architecture
 
 ```text
 Fedora build host
@@ -41,18 +42,29 @@ Fedora build host
       v
 Veyr Forge
       |
-      +--> Binutils cross
-      +--> GCC pass 1
-      +--> Linux API headers
-      +--> Glibc bootstrap
+      +--> alpha.1 cross toolchain
+      |
+      +--> Libstdc++ pass 1
+      +--> M4
+      +--> Ncurses
+      +--> Bash
+      +--> Coreutils
+      +--> Diffutils / File / Findutils
+      +--> Gawk / Grep / Gzip
+      +--> Make / Patch / Sed / Tar / Xz
+      +--> Binutils pass 2
+      +--> GCC pass 2
       |
       v
-out/sysroot
-      |
-      +--> toolchain sanity test
+out/sysroot/usr
       |
       v
-Veyr base-alpha1 initramfs
+base-alpha2 initramfs
+      |
+      +--> static BusyBox only for early init helpers
+      |
+      v
+Bash userspace + GCC runtime test
       |
       v
 QEMU/KVM
@@ -68,15 +80,15 @@ x86_64-veyr-linux-gnu
 
 ## Requirements
 
-The current supported build host is Fedora Linux on x86_64.
+The currently supported build host is Fedora Linux on x86_64.
 
-Install host dependencies:
+Install dependencies:
 
 ```bash
 make deps
 ```
 
-Verify them:
+Verify the host:
 
 ```bash
 ./veyr doctor
@@ -84,36 +96,36 @@ Verify them:
 
 ---
 
-## Build Veyr Base alpha.1
+## Build alpha.2
 
-Inspect the dependency graph:
-
-```bash
-./veyr graph base-alpha1
-```
-
-Build the full image:
+Inspect the graph:
 
 ```bash
-./veyr image base-alpha1
+./veyr graph base-alpha2
 ```
 
-Or:
+Fetch sources:
 
 ```bash
-make alpha1
+./veyr fetch --profile base-alpha2
 ```
 
-The build produces a Veyr sysroot under:
+Build the temporary userspace only:
 
-```text
-out/sysroot/
+```bash
+make temporary
 ```
 
-and the alpha image under:
+Build the complete alpha.2 image:
 
-```text
-out/images/base-alpha1/
+```bash
+make alpha2
+```
+
+or:
+
+```bash
+./veyr image base-alpha2
 ```
 
 ---
@@ -121,36 +133,73 @@ out/images/base-alpha1/
 ## Run in QEMU/KVM
 
 ```bash
-./veyr run base-alpha1
+make run
 ```
 
 or:
 
 ```bash
-make run
+./veyr run base-alpha2
 ```
 
-During boot, the initramfs automatically runs a dynamically linked program produced by the Veyr cross compiler. A successful result contains:
+A successful boot should contain:
 
 ```text
-Veyr cross-toolchain userspace test: OK
-Runtime verification result: PASS
+Veyr temporary C compiler test: OK
+Veyr temporary C++ compiler test: OK
+Temporary userspace verification result: PASS
+Alpha.2 runtime verification: PASS
 ```
 
-This verifies that a Veyr-built program can load using the bootstrap Veyr Glibc inside the VM.
+The interactive shell is now `/usr/bin/bash`.
+
+BusyBox is retained only as a static early-boot helper for operations such as mounting `/proc`, `/sys`, and setting up the controlling terminal.
 
 ---
 
-## Keep testing the old bootstrap
+## Regression profiles
 
-The previous minimal image is intentionally preserved:
+Original bootstrap:
 
 ```bash
-./veyr image bootstrap
-./veyr run bootstrap
+make bootstrap
+make bootstrap-run
 ```
 
-This is useful for catching regressions in the image pipeline independently of the new toolchain.
+Alpha.1:
+
+```bash
+make alpha1
+make run-alpha1
+```
+
+---
+
+## Important paths
+
+Cross-toolchain:
+
+```text
+out/sysroot/tools/
+```
+
+Temporary target userspace:
+
+```text
+out/sysroot/usr/
+```
+
+Alpha.2 image:
+
+```text
+out/images/base-alpha2/
+```
+
+Runtime smoke test:
+
+```text
+tests/userspace/smoke.sh
+```
 
 ---
 
@@ -158,54 +207,35 @@ This is useful for catching regressions in the image pipeline independently of t
 
 ```bash
 ./veyr --version
+./veyr doctor
 ./veyr list packages
 ./veyr list profiles
-./veyr info profile base-alpha1
-./veyr graph base-alpha1
-./veyr fetch --profile base-alpha1
-./veyr build binutils-cross
-./veyr build gcc-cross
-./veyr build linux-headers
-./veyr build glibc-bootstrap
-./veyr build --profile base-alpha1
-./veyr image base-alpha1
-./veyr run base-alpha1
+./veyr graph base-alpha2
+./veyr info profile base-alpha2
+./veyr fetch --profile base-alpha2
+./veyr build --profile temporary-alpha2
+./veyr image base-alpha2
+./veyr run base-alpha2
 ./veyr clean
-```
-
-Force a rebuild when changing a lower-level toolchain dependency:
-
-```bash
-./veyr image base-alpha1 --rebuild
 ```
 
 ---
 
-## Repository layout
+## Forge source mirrors
 
-```text
-veyr/
-├── assets/
-├── config/
-├── docs/
-├── initramfs/
-├── iso/
-├── packages/
-│   ├── core/
-│   ├── toolchain/
-│   ├── desktop/
-│   └── developer/
-├── profiles/
-├── rootfs/
-├── scripts/
-├── tests/
-├── tools/
-│   └── forge/
-├── build/
-├── sources/
-├── out/
-└── veyr
+Forge format 2 supports multiple source URLs in a package manifest:
+
+```toml
+[source]
+urls = [
+  "https://primary.example/package.tar.xz",
+  "https://mirror.example/package.tar.xz",
+]
+archive = "package.tar.xz"
+sha256 = "..."
 ```
+
+If one endpoint returns an HTTP error, Forge tries the next source. A file is accepted only if its SHA-256 matches the pinned value.
 
 ---
 
@@ -217,4 +247,6 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## License
 
-Veyr project tooling, scripts, manifests and documentation are published under the MIT License unless noted otherwise. Upstream components retain their own licenses.
+Veyr project tooling, scripts, manifests, documentation, and original project assets are published under the repository license unless noted otherwise.
+
+Upstream projects retain their own licenses.

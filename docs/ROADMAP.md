@@ -1,6 +1,7 @@
 # Veyr Roadmap
 
 Veyr is an independent Linux distribution built from upstream components.
+
 Both future editions share one common **Veyr Base**:
 
 - **Veyr Desktop** — for everyday users.
@@ -39,41 +40,27 @@ Status: **done**
 
 Status: **in development**
 
-The `0.1` milestone is intentionally split into internal alpha stages. The public `0.1.0` milestone is reached only after the real base userspace is complete and bootable.
+The `0.1` milestone is split into internal alpha stages.
 
 ## 0.1.0-alpha.1 — Cross Toolchain
 
+Status: **done**
+
+- Binutils cross tools.
+- GCC pass 1.
+- GMP / MPFR / MPC sources for GCC.
+- Linux API headers.
+- Bootstrap Glibc.
+- Veyr target triplet: `x86_64-veyr-linux-gnu`.
+- Linker/sysroot runtime validation in QEMU.
+
+## 0.1.0-alpha.2 — Temporary Userspace
+
 Status: **current**
 
-Goals:
+Planned/implemented package set:
 
-- Binutils 2.47 cross tools.
-- GCC 16.1.0 pass 1.
-- GMP 6.3.0 sources for GCC.
-- MPFR 4.2.2 sources for GCC.
-- MPC 1.4.1 sources for GCC.
-- Linux 7.1.5 API headers.
-- Glibc 2.44 bootstrap installation.
-- Veyr target triplet: `x86_64-veyr-linux-gnu`.
-- Linker/sysroot sanity checks.
-- Execute a dynamically linked Veyr test binary inside QEMU/KVM.
-
-Deliverable:
-
-```text
-out/sysroot/tools/bin/x86_64-veyr-linux-gnu-gcc
-out/sysroot/usr/include/
-out/sysroot/usr/lib/libc.so.6
-out/sysroot/usr/lib/ld-linux-x86-64.so.2
-```
-
-The image still uses static BusyBox as PID 1 / shell. Its purpose is to prove the new Veyr toolchain and Glibc work at runtime.
-
-## 0.1.0-alpha.2 — Temporary userspace
-
-Planned:
-
-- Libstdc++ temporary build.
+- Libstdc++ pass 1.
 - M4.
 - Ncurses.
 - Bash.
@@ -92,17 +79,46 @@ Planned:
 - Binutils pass 2.
 - GCC pass 2.
 
-Goal: create enough Veyr-native temporary tooling to stop depending on the Fedora userspace during later system construction.
+Additional goals:
 
-## 0.1.0-alpha.3 — Final base userspace
+- Forge source mirror fallback.
+- Dependency-aware build fingerprints.
+- Preserve `bootstrap` and `base-alpha1` regression images.
+- Boot the VM into real Bash.
+- Compile and execute C and C++ programs inside Veyr itself.
+
+Success condition:
+
+```text
+Temporary userspace verification result: PASS
+Alpha.2 runtime verification: PASS
+```
+
+## 0.1.0-alpha.3 — Chroot and additional temporary tools
 
 Planned:
 
-- Controlled chroot build stage.
-- Final Glibc.
-- Final Binutils/GCC.
-- Bash and Coreutils as real Veyr userspace.
+- Controlled chroot entry.
+- Essential users/groups and directory structure.
+- Gettext.
+- Bison.
+- Perl.
+- Zlib.
+- Python.
+- Texinfo.
 - Util-linux.
+- Save/clean temporary system.
+
+Goal: build inside the Veyr filesystem rather than relying on Fedora userspace tools for the next stage.
+
+## 0.1.0-alpha.4 — Final base userspace
+
+Planned:
+
+- Final Glibc.
+- Final Binutils.
+- Final GCC.
+- Final Bash/Coreutils and essential packages.
 - Kmod.
 - E2fsprogs.
 - Procps.
@@ -110,24 +126,36 @@ Planned:
 - Systemd.
 - Essential `/etc` configuration.
 
-Goal: boot a real Veyr Base userspace instead of the BusyBox bootstrap shell.
+Goal:
+
+```text
+kernel
+  ↓
+systemd
+  ↓
+login
+  ↓
+bash
+```
+
+without BusyBox as the primary userspace.
 
 ## 0.1.0 — Veyr Base
 
-Planned release criteria:
+Release criteria:
 
 - Real Glibc userspace.
 - Bash/Coreutils environment.
 - Systemd as init/system manager.
-- Veyr can boot in QEMU without relying on BusyBox as the primary userspace.
-- Build pipeline reproducibly reconstructs the base from pinned upstream sources.
+- Reproducible Veyr Base build.
+- QEMU boot without BusyBox as the primary shell/userspace.
 
 ---
 
 ## 0.2 — Package artifacts and repository groundwork
 
 - Binary package strategy.
-- Package metadata database.
+- Package metadata.
 - Repository generation.
 - Signing groundwork.
 - Update architecture groundwork.
@@ -138,20 +166,20 @@ Planned release criteria:
 
 - Virtual disk installation.
 - GPT/UEFI layout.
-- Persistent root filesystem.
+- Persistent filesystem.
 - Bootloader installation.
-- Boot installed Veyr after removing the ISO.
+- Boot installed Veyr without ISO.
 
 ---
 
-## 0.4 — Hardware/network base
+## 0.4 — Hardware and network base
 
 - Firmware.
 - Networking.
 - NetworkManager.
 - Bluetooth.
 - PipeWire/WirePlumber.
-- Mesa/Wayland graphics groundwork.
+- Mesa/Wayland.
 
 ---
 
@@ -160,28 +188,28 @@ Planned release criteria:
 - KDE Plasma.
 - Familiar Windows-style interaction model with original Veyr visuals.
 - Graphical settings.
-- Graphical application installation.
+- Graphical software installation.
 - Flatpak integration.
 - Graphical updates.
 
 ---
 
-## 0.6+ — Installer, updates and desktop hardening
+## 0.6+ — Installer, updates and hardening
 
 - Live image.
 - Graphical installer.
-- Btrfs snapshot/rollback design.
+- Btrfs snapshots/rollback.
 - Signed update flow.
-- Hardware compatibility work.
+- Hardware compatibility.
 
 ---
 
 ## 1.0 — Veyr Desktop stable
 
-Goal: an installable, updateable daily desktop for non-technical users where normal tasks do not require the terminal.
+Goal: an installable, updateable desktop for non-technical users where normal tasks do not require the terminal.
 
 ---
 
 ## 1.x — Veyr Developer
 
-Built on the same Veyr Base with development tooling, advanced workflow defaults, and an optional developer-oriented desktop environment.
+Built on the same Veyr Base with development tooling and developer-oriented defaults.

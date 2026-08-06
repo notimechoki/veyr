@@ -1,0 +1,22 @@
+[package]
+name = "bash-temporary"
+version = "5.3"
+category = "temporary"
+description = "Bash temporary shell"
+dependencies = ["ncurses-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/bash",
+  "out/sysroot/usr/bin/sh",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/bash/bash-5.3.tar.gz",
+  "https://ftp.gnu.org/gnu/bash/bash-5.3.tar.gz",
+]
+archive = "bash-5.3.tar.gz"
+sha256 = "0d5cd86965f869a26cf64f4b71be7b96f90a3ba8b3d74e27e8e9d9d5550f31ba"
+
+[build]
+script = "build.sh"

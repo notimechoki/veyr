@@ -1,0 +1,16 @@
+[profile]
+id = "base-alpha2"
+name = "Veyr Base Alpha 2"
+status = "active"
+description = "Temporary Veyr userspace runtime and self-hosting validation image"
+parent = "temporary-alpha2"
+packages = ["busybox", "linux"]
+
+[image]
+steps = [
+  "scripts/build-userspace-test.sh",
+  "scripts/build-alpha2-initramfs.sh",
+  "scripts/build-alpha2-iso.sh",
+]
+
+run = "scripts/run-alpha2-qemu.sh"

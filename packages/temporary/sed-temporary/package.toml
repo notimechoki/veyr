@@ -1,0 +1,21 @@
+[package]
+name = "sed-temporary"
+version = "4.10"
+category = "temporary"
+description = "GNU Sed temporary stream editor"
+dependencies = ["patch-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/sed",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/sed/sed-4.10.tar.xz",
+  "https://ftp.gnu.org/gnu/sed/sed-4.10.tar.xz",
+]
+archive = "sed-4.10.tar.xz"
+sha256 = "b8e72182b2ec96a3574e2998c47b7aaa64cc20ce000d8e9ac313cc07cecf28c7"
+
+[build]
+script = "build.sh"

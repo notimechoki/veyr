@@ -1,0 +1,60 @@
+#!/usr/libexec/busybox sh
+
+BB=/usr/libexec/busybox
+
+export PATH=/rescue-bin
+unset LD_LIBRARY_PATH
+
+export HOME=/root
+export TERM=linux
+export SHELL=/rescue-bin/sh
+
+"$BB" mkdir -p \
+    /dev \
+    /proc \
+    /sys \
+    /run \
+    /tmp \
+    /root
+
+"$BB" mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+fi
+
+"$BB" mount -t proc proc /proc 2>/dev/null || true
+"$BB" mount -t sysfs sysfs /sys 2>/dev/null || true
+"$BB" mount -t tmpfs tmpfs /run 2>/dev/null || true
+"$BB" mount -t tmpfs tmpfs /tmp 2>/dev/null || true
+
+"$BB" chmod 1777 /tmp 2>/dev/null || true
+"$BB" hostname veyr-rescue 2>/dev/null || true
+
+clear 2>/dev/null || true
+
+echo
+echo "Veyr static rescue environment"
+echo "=============================="
+echo
+echo "This boot entry bypasses the temporary dynamic userspace."
+echo "Commands here are static BusyBox applets."
+echo
+echo "Useful commands:"
+echo "  uname -a"
+echo "  ls -l /"
+echo "  cat /etc/os-release"
+echo "  ls -l /usr/bin/bash"
+echo "  ls -l /usr/lib/libc.so.6"
+echo "  ls -l /lib64/ld-linux-x86-64.so.2"
+echo
+
+while :; do
+    /rescue-bin/sh -i
+
+    status=$?
+
+    echo "[rescue-init] shell exited with status ${status}; restarting..."
+
+    /rescue-bin/sleep 1
+done

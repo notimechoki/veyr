@@ -1,0 +1,22 @@
+[package]
+name = "xz-temporary"
+version = "5.8.3"
+category = "temporary"
+description = "XZ temporary compression tools"
+dependencies = ["tar-temporary"]
+required_commands = ["make"]
+outputs = [
+  "out/sysroot/usr/bin/xz",
+  "out/sysroot/usr/lib/liblzma.so",
+]
+
+[source]
+urls = [
+  "https://github.com/tukaani-project/xz/releases/download/v5.8.3/xz-5.8.3.tar.xz",
+  "https://tukaani.org/xz/xz-5.8.3.tar.xz",
+]
+archive = "xz-5.8.3.tar.xz"
+sha256 = "fff1ffcf2b0da84d308a14de513a1aa23d4e9aa3464d17e64b9714bfdd0bbfb6"
+
+[build]
+script = "build.sh"
