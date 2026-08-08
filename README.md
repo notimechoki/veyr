@@ -179,8 +179,6 @@ or:
 The helper prepares the virtual kernel filesystems, enters the staging Veyr
 root with a clean environment, and unmounts everything on exit.
 
-See [`docs/ALPHA3.md`](docs/ALPHA3.md) for the full alpha.3 workflow.
-
 ## Regression profiles
 
 Bootstrap:
