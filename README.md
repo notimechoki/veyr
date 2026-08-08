@@ -5,36 +5,37 @@
 <p align="center"><strong>An independent Linux distribution built from upstream components.</strong></p>
 
 <p align="center">
-  <em>Current development stage: Veyr Base 0.1.0-alpha.2 — Temporary Userspace</em>
+  <em>Current development stage: Veyr Base 0.1.0-alpha.3 — Disk Root & Chroot Foundation</em>
 </p>
 
 ---
 
 ## About
 
-**Veyr** is an independent Linux distribution project built from upstream components instead of using Fedora, Ubuntu, Arch, or another distribution as its runtime base.
+**Veyr** is an independent Linux distribution project built from upstream
+components instead of using Fedora, Ubuntu, Arch, or another distribution as
+its runtime base.
 
-The long-term architecture consists of one shared **Veyr Base** and two editions:
+The long-term architecture consists of one shared **Veyr Base** and two
+editions:
 
-- **Veyr Desktop** — a polished, graphical edition for everyday users.
+- **Veyr Desktop** — a polished graphical edition for everyday users.
 - **Veyr Developer** — a development-focused edition built on the same base.
 
 Fedora is currently used only as the build host.
-
----
 
 ## Milestones
 
 - **0.0.1** — bootable Linux + static BusyBox bootstrap image.
 - **0.0.2** — Veyr Forge prototype.
-- **0.1.0-alpha.1** — cross Binutils/GCC + Linux API headers + bootstrap Glibc.
-- **0.1.0-alpha.2** — temporary Veyr userspace + pass-2 compiler toolchain.
+- **0.1.0-alpha.1** — Veyr cross-toolchain + bootstrap Glibc.
+- **0.1.0-alpha.2** — temporary GNU userspace + pass-2 compiler toolchain.
+- **0.1.0-alpha.3** — small early initramfs + ext4 disk root + `switch_root` + controlled chroot workflow.
 
-The original `bootstrap` and `base-alpha1` profiles remain available as regression/control images.
+The older `bootstrap`, `base-alpha1`, and `base-alpha2` profiles remain in the
+repository as regression/development profiles.
 
----
-
-## Alpha.2 architecture
+## Alpha.3 architecture
 
 ```text
 Fedora build host
@@ -44,30 +45,32 @@ Veyr Forge
       |
       +--> alpha.1 cross toolchain
       |
-      +--> Libstdc++ pass 1
-      +--> M4
-      +--> Ncurses
-      +--> Bash
-      +--> Coreutils
-      +--> Diffutils / File / Findutils
-      +--> Gawk / Grep / Gzip
-      +--> Make / Patch / Sed / Tar / Xz
-      +--> Binutils pass 2
-      +--> GCC pass 2
+      +--> alpha.2 temporary userspace
+      |
+      +--> small static BusyBox initramfs
+      |
+      +--> sparse ext4 Veyr root image
       |
       v
-out/sysroot/usr
+QEMU
       |
       v
-base-alpha2 initramfs
-      |
-      +--> static BusyBox only for early init helpers
+Linux 7.1.5
       |
       v
-Bash userspace + GCC runtime test
+/init in small initramfs
       |
       v
-QEMU/KVM
+/dev/vda -> /newroot
+      |
+      v
+switch_root
+      |
+      v
+/sbin/init on Veyr ext4 root
+      |
+      v
+Bash + GCC/G++ runtime verification
 ```
 
 Target triplet:
@@ -75,8 +78,6 @@ Target triplet:
 ```text
 x86_64-veyr-linux-gnu
 ```
-
----
 
 ## Requirements
 
@@ -94,43 +95,46 @@ Verify the host:
 ./veyr doctor
 ```
 
----
-
-## Build alpha.2
+## Build alpha.3
 
 Inspect the graph:
 
 ```bash
-./veyr graph base-alpha2
+./veyr graph base-alpha3
 ```
 
 Fetch sources:
 
 ```bash
-./veyr fetch --profile base-alpha2
+./veyr fetch --profile base-alpha3
 ```
 
-Build the temporary userspace only:
+Build the image:
 
 ```bash
-make temporary
-```
-
-Build the complete alpha.2 image:
-
-```bash
-make alpha2
+make alpha3
 ```
 
 or:
 
 ```bash
-./veyr image base-alpha2
+./veyr image base-alpha3
 ```
 
----
+Generated artifacts:
 
-## Run in QEMU/KVM
+```text
+out/images/base-alpha3/initramfs.img
+out/images/base-alpha3/veyr-rootfs.ext4
+out/images/base-alpha3/Veyr-0.1.0-alpha.3-base-alpha3-x86_64.iso
+```
+
+The root filesystem image is sparse and defaults to an 8 GiB logical size.
+Unlike alpha.2, the complete userspace is no longer unpacked into guest RAM.
+
+## Run in QEMU
+
+Graphical:
 
 ```bash
 make run
@@ -139,27 +143,47 @@ make run
 or:
 
 ```bash
-./veyr run base-alpha2
+./veyr run base-alpha3
+```
+
+Serial/debug mode:
+
+```bash
+make run-alpha3-serial
 ```
 
 A successful boot should contain:
 
 ```text
-Veyr temporary C compiler test: OK
-Veyr temporary C++ compiler test: OK
-Temporary userspace verification result: PASS
-Alpha.2 runtime verification: PASS
+Disk root verification result: PASS
+Alpha.3 runtime verification: PASS
 ```
 
-The interactive shell is now `/usr/bin/bash`.
+The normal alpha.3 VM uses approximately 2 GiB of guest RAM instead of the 8
+GiB required by alpha.2's giant initramfs.
 
-BusyBox is retained only as a static early-boot helper for operations such as mounting `/proc`, `/sys`, and setting up the controlling terminal.
+## Enter the Veyr chroot
 
----
+After building alpha.3:
+
+```bash
+make chroot-alpha3
+```
+
+or:
+
+```bash
+./scripts/chroot-alpha3.sh
+```
+
+The helper prepares the virtual kernel filesystems, enters the staging Veyr
+root with a clean environment, and unmounts everything on exit.
+
+See [`docs/ALPHA3.md`](docs/ALPHA3.md) for the full alpha.3 workflow.
 
 ## Regression profiles
 
-Original bootstrap:
+Bootstrap:
 
 ```bash
 make bootstrap
@@ -173,35 +197,15 @@ make alpha1
 make run-alpha1
 ```
 
----
+Alpha.2:
 
-## Important paths
-
-Cross-toolchain:
-
-```text
-out/sysroot/tools/
+```bash
+make alpha2
+make run-alpha2
 ```
 
-Temporary target userspace:
-
-```text
-out/sysroot/usr/
-```
-
-Alpha.2 image:
-
-```text
-out/images/base-alpha2/
-```
-
-Runtime smoke test:
-
-```text
-tests/userspace/smoke.sh
-```
-
----
+Alpha.2 intentionally retains its 8 GiB VM configuration because its userspace
+is stored entirely in initramfs.
 
 ## Useful Forge commands
 
@@ -210,43 +214,21 @@ tests/userspace/smoke.sh
 ./veyr doctor
 ./veyr list packages
 ./veyr list profiles
-./veyr graph base-alpha2
-./veyr info profile base-alpha2
-./veyr fetch --profile base-alpha2
-./veyr build --profile temporary-alpha2
-./veyr image base-alpha2
-./veyr run base-alpha2
+./veyr graph base-alpha3
+./veyr info profile base-alpha3
+./veyr fetch --profile base-alpha3
+./veyr image base-alpha3
+./veyr run base-alpha3
 ./veyr clean
 ```
-
----
-
-## Forge source mirrors
-
-Forge format 2 supports multiple source URLs in a package manifest:
-
-```toml
-[source]
-urls = [
-  "https://primary.example/package.tar.xz",
-  "https://mirror.example/package.tar.xz",
-]
-archive = "package.tar.xz"
-sha256 = "..."
-```
-
-If one endpoint returns an HTTP error, Forge tries the next source. A file is accepted only if its SHA-256 matches the pinned value.
-
----
 
 ## Roadmap
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
----
-
 ## License
 
-Veyr project tooling, scripts, manifests, documentation, and original project assets are published under the repository license unless noted otherwise.
+Veyr project tooling, scripts, manifests, documentation, and original project
+assets are published under the repository license unless noted otherwise.
 
 Upstream projects retain their own licenses.

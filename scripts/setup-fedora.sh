@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-echo "Installing Veyr build, Forge and temporary-userspace dependencies..."
+echo "Installing Veyr build, Forge and image dependencies..."
 
 sudo dnf install -y \
     python3 \
@@ -32,6 +32,7 @@ sudo dnf install -y \
     xz \
     tar \
     file \
+    e2fsprogs \
     openssl-devel \
     elfutils-libelf-devel \
     ncurses-devel \

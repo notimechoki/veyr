@@ -1,0 +1,82 @@
+#!/usr/libexec/busybox sh
+
+BB=/usr/libexec/busybox
+
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+export HOME=/root
+export TERM=linux
+export SHELL=/usr/bin/bash
+
+unset LD_LIBRARY_PATH
+
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+fi
+
+"$BB" hostname veyr 2>/dev/null || true
+"$BB" chmod 1777 /tmp 2>/dev/null || true
+"$BB" clear 2>/dev/null || true
+
+if [ -f /etc/motd ]; then
+    "$BB" cat /etc/motd
+fi
+
+echo
+echo "Image profile: base-alpha3"
+
+echo
+echo "System information:"
+echo "-------------------"
+echo "Hostname: $($BB hostname 2>/dev/null || echo veyr)"
+echo "Kernel:   $($BB uname -r)"
+echo "Arch:     $($BB uname -m)"
+
+ALPHA3_OK=0
+
+if [ -x /usr/lib/veyr-tests/rootfs-alpha3-smoke.sh ]; then
+    echo
+    echo "Disk-root runtime verification:"
+    echo "-------------------------------"
+
+    if /usr/bin/bash /usr/lib/veyr-tests/rootfs-alpha3-smoke.sh; then
+        echo "Alpha.3 runtime verification: PASS"
+        ALPHA3_OK=1
+    else
+        status=$?
+        echo "Alpha.3 runtime verification: FAIL (${status})"
+    fi
+fi
+
+if [ "$ALPHA3_OK" -eq 1 ]; then
+    echo
+    echo "Veyr alpha.3 disk-backed userspace is ready."
+
+    echo
+    echo "Useful commands:"
+    echo "  cat /proc/mounts | grep ' / '"
+    echo "  df -h /"
+    echo "  uname -a"
+    echo "  cat /etc/os-release"
+    echo "  gcc --version"
+    echo "  g++ --version"
+    echo "  make --version"
+    echo "  poweroff -f"
+    echo "  reboot -f"
+else
+    echo
+    echo "[init] alpha.3 verification failed; starting diagnostic shell."
+fi
+
+echo
+echo "[init] Starting Veyr Bash console..."
+
+while :; do
+    "$BB" setsid "$BB" cttyhack /usr/bin/bash --noprofile --norc -i
+
+    status=$?
+
+    echo
+    echo "[init] Bash exited with status ${status}; restarting..."
+
+    "$BB" sleep 1
+done

@@ -1,0 +1,18 @@
+[profile]
+id = "base-alpha3"
+name = "Veyr Base Alpha 3"
+status = "active"
+description = "Disk-backed Veyr root filesystem, small initramfs and switch_root validation"
+parent = "temporary-alpha2"
+packages = ["busybox", "linux"]
+
+[image]
+steps = [
+  "scripts/build-userspace-test.sh",
+  "scripts/build-alpha3-rootfs.sh",
+  "scripts/build-alpha3-initramfs.sh",
+  "scripts/validate-alpha3-image.sh",
+  "scripts/build-alpha3-iso.sh",
+]
+
+run = "scripts/run-alpha3-qemu.sh"

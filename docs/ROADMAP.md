@@ -7,8 +7,6 @@ Both future editions share one common **Veyr Base**:
 - **Veyr Desktop** — for everyday users.
 - **Veyr Developer** — for development workflows.
 
----
-
 ## 0.0.1 — Bootstrap proof of concept
 
 Status: **done**
@@ -18,8 +16,6 @@ Status: **done**
 - Static BusyBox initramfs.
 - GRUB boot menu.
 - QEMU/KVM workflow.
-
----
 
 ## 0.0.2 — Forge prototype
 
@@ -33,32 +29,26 @@ Status: **done**
 - Build output validation.
 - Build fingerprints/cache.
 - Image orchestration.
-
----
+- Source mirror fallback.
 
 # 0.1 — Veyr Base
 
 Status: **in development**
 
-The `0.1` milestone is split into internal alpha stages.
-
 ## 0.1.0-alpha.1 — Cross Toolchain
 
 Status: **done**
 
-- Binutils cross tools.
+- Cross Binutils.
 - GCC pass 1.
-- GMP / MPFR / MPC sources for GCC.
 - Linux API headers.
 - Bootstrap Glibc.
-- Veyr target triplet: `x86_64-veyr-linux-gnu`.
-- Linker/sysroot runtime validation in QEMU.
+- `x86_64-veyr-linux-gnu` target.
+- Cross-toolchain runtime verification.
 
 ## 0.1.0-alpha.2 — Temporary Userspace
 
-Status: **current**
-
-Planned/implemented package set:
+Status: **done**
 
 - Libstdc++ pass 1.
 - M4.
@@ -78,40 +68,65 @@ Planned/implemented package set:
 - Xz.
 - Binutils pass 2.
 - GCC pass 2.
+- Dynamic loader cache.
+- C/C++ compilation inside the Veyr VM.
 
-Additional goals:
-
-- Forge source mirror fallback.
-- Dependency-aware build fingerprints.
-- Preserve `bootstrap` and `base-alpha1` regression images.
-- Boot the VM into real Bash.
-- Compile and execute C and C++ programs inside Veyr itself.
-
-Success condition:
+Success condition achieved:
 
 ```text
 Temporary userspace verification result: PASS
 Alpha.2 runtime verification: PASS
 ```
 
-## 0.1.0-alpha.3 — Chroot and additional temporary tools
+The alpha.2 experiment also demonstrated that storing the complete temporary
+userspace in initramfs is not a viable architecture: reliable boot required
+roughly 8 GiB of guest RAM.
+
+## 0.1.0-alpha.3 — Disk Root & Chroot Foundation
+
+Status: **current**
+
+- Small static BusyBox early initramfs.
+- Built-in kernel support for ext4 and virtio block devices.
+- Sparse ext4 Veyr root filesystem image.
+- QEMU root disk attached as `/dev/vda`.
+- Early mount of `/dev/vda`.
+- `switch_root` from initramfs into the Veyr disk root.
+- Runtime verification that `/` is a writable ext4 disk root.
+- C/C++ compiler verification from the disk-backed userspace.
+- Controlled host-side chroot helper.
+- Keep alpha.1/alpha.2 as regression profiles.
+
+Success condition:
+
+```text
+Disk root verification result: PASS
+Alpha.3 runtime verification: PASS
+```
+
+Target VM memory: approximately 2 GiB instead of alpha.2's 8 GiB.
+
+## 0.1.0-alpha.4 — Additional temporary tools in chroot
 
 Planned:
 
-- Controlled chroot entry.
-- Essential users/groups and directory structure.
+- Build from inside the Veyr filesystem rather than the Fedora userspace.
+- Essential directory/file cleanup for the native build stage.
 - Gettext.
 - Bison.
 - Perl.
 - Zlib.
+- mpdecimal.
 - Python.
 - Texinfo.
 - Util-linux.
-- Save/clean temporary system.
+- Save/clean the temporary system.
 
-Goal: build inside the Veyr filesystem rather than relying on Fedora userspace tools for the next stage.
+This stage follows the same architectural boundary used by Linux From Scratch:
+after the cross-built temporary toolchain, additional temporary tools are built
+inside chroot.
 
-## 0.1.0-alpha.4 — Final base userspace
+## 0.1.0-alpha.5 — Final base userspace
 
 Planned:
 
@@ -148,9 +163,8 @@ Release criteria:
 - Bash/Coreutils environment.
 - Systemd as init/system manager.
 - Reproducible Veyr Base build.
+- Disk-backed root filesystem.
 - QEMU boot without BusyBox as the primary shell/userspace.
-
----
 
 ## 0.2 — Package artifacts and repository groundwork
 
@@ -160,17 +174,12 @@ Release criteria:
 - Signing groundwork.
 - Update architecture groundwork.
 
----
-
 ## 0.3 — Persistent installation
 
-- Virtual disk installation.
-- GPT/UEFI layout.
-- Persistent filesystem.
+- GPT/UEFI installation layout.
+- Installer target disk handling.
 - Bootloader installation.
-- Boot installed Veyr without ISO.
-
----
+- Boot installed Veyr without the development ISO.
 
 ## 0.4 — Hardware and network base
 
@@ -181,8 +190,6 @@ Release criteria:
 - PipeWire/WirePlumber.
 - Mesa/Wayland.
 
----
-
 ## 0.5 — Veyr Desktop
 
 - KDE Plasma.
@@ -192,8 +199,6 @@ Release criteria:
 - Flatpak integration.
 - Graphical updates.
 
----
-
 ## 0.6+ — Installer, updates and hardening
 
 - Live image.
@@ -202,14 +207,12 @@ Release criteria:
 - Signed update flow.
 - Hardware compatibility.
 
----
-
 ## 1.0 — Veyr Desktop stable
 
-Goal: an installable, updateable desktop for non-technical users where normal tasks do not require the terminal.
-
----
+Goal: an installable, updateable desktop for non-technical users where normal
+tasks do not require the terminal.
 
 ## 1.x — Veyr Developer
 
-Built on the same Veyr Base with development tooling and developer-oriented defaults.
+Built on the same Veyr Base with development tooling and developer-oriented
+defaults.

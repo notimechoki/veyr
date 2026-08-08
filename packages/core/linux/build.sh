@@ -14,7 +14,7 @@ mkdir -p "${VEYR_PACKAGE_OUT}"
 printf '\n[LINUX] Creating default x86_64 configuration\n'
 make defconfig
 
-printf '[LINUX] Enabling bootstrap options\n'
+printf '[LINUX] Enabling Veyr boot and disk-root options\n'
 scripts/config --enable BLK_DEV_INITRD
 scripts/config --enable DEVTMPFS
 scripts/config --enable DEVTMPFS_MOUNT
@@ -28,7 +28,27 @@ scripts/config --enable VGA_CONSOLE
 scripts/config --enable SERIAL_8250
 scripts/config --enable SERIAL_8250_CONSOLE
 
+scripts/config --enable BLOCK
+scripts/config --enable PCI
+scripts/config --enable VIRTIO
+scripts/config --enable VIRTIO_PCI
+scripts/config --enable VIRTIO_BLK
+scripts/config --enable EXT4_FS
+
 make olddefconfig
+
+for option in \
+    CONFIG_BLK_DEV_INITRD=y \
+    CONFIG_DEVTMPFS=y \
+    CONFIG_EXT4_FS=y \
+    CONFIG_VIRTIO=y \
+    CONFIG_VIRTIO_PCI=y \
+    CONFIG_VIRTIO_BLK=y; do
+    grep -qx "${option}" .config || {
+        echo "Required kernel option was not enabled: ${option}" >&2
+        exit 1
+    }
+done
 
 printf '[LINUX] Building kernel with %s jobs\n' "${VEYR_JOBS}"
 make -j"${VEYR_JOBS}"
