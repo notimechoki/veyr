@@ -5,7 +5,7 @@
 <p align="center"><strong>An independent Linux distribution built from upstream components.</strong></p>
 
 <p align="center">
-  <em>Current development stage: Veyr Base 0.1.0-alpha.3 — Disk Root & Chroot Foundation</em>
+  <em>Current development stage: Veyr Base 0.1.0-alpha.4 — Native Chroot Tooling</em>
 </p>
 
 ---
@@ -30,47 +30,43 @@ Fedora is currently used only as the build host.
 - **0.0.2** — Veyr Forge prototype.
 - **0.1.0-alpha.1** — Veyr cross-toolchain + bootstrap Glibc.
 - **0.1.0-alpha.2** — temporary GNU userspace + pass-2 compiler toolchain.
-- **0.1.0-alpha.3** — small early initramfs + ext4 disk root + `switch_root` + controlled chroot workflow.
+- **0.1.0-alpha.3** — small initramfs + ext4 disk root + `switch_root` + chroot foundation.
+- **0.1.0-alpha.4** — Forge format 3 + native package builds inside the Veyr chroot.
 
-The older `bootstrap`, `base-alpha1`, and `base-alpha2` profiles remain in the
-repository as regression/development profiles.
+Older profiles remain available as regression/development profiles.
 
-## Alpha.3 architecture
+## Alpha.4 architecture
 
 ```text
 Fedora build host
       |
       v
-Veyr Forge
+Veyr Forge format 3
       |
       +--> alpha.1 cross toolchain
-      |
       +--> alpha.2 temporary userspace
-      |
-      +--> small static BusyBox initramfs
-      |
-      +--> sparse ext4 Veyr root image
+      +--> alpha.3 disk-root foundation
       |
       v
-QEMU
+prepare base-alpha4 rootfs
       |
       v
-Linux 7.1.5
+Veyr chroot
+      |
+      +--> Gettext
+      +--> Bison
+      +--> Perl
+      +--> Zlib
+      +--> mpdecimal
+      +--> Python
+      +--> Texinfo
+      +--> Util-linux
       |
       v
-/init in small initramfs
+ext4 Veyr root image
       |
       v
-/dev/vda -> /newroot
-      |
-      v
-switch_root
-      |
-      v
-/sbin/init on Veyr ext4 root
-      |
-      v
-Bash + GCC/G++ runtime verification
+small BusyBox initramfs -> switch_root -> Veyr
 ```
 
 Target triplet:
@@ -83,150 +79,83 @@ x86_64-veyr-linux-gnu
 
 The currently supported build host is Fedora Linux on x86_64.
 
-Install dependencies:
-
 ```bash
 make deps
-```
-
-Verify the host:
-
-```bash
 ./veyr doctor
 ```
 
-## Build alpha.3
-
-Inspect the graph:
+## Build alpha.4
 
 ```bash
-./veyr graph base-alpha3
+./veyr graph base-alpha4
+./veyr fetch --profile base-alpha4
+./veyr image base-alpha4
 ```
 
-Fetch sources:
+Or:
 
 ```bash
-./veyr fetch --profile base-alpha3
+make alpha4
 ```
 
-Build the image:
-
-```bash
-make alpha3
-```
-
-or:
-
-```bash
-./veyr image base-alpha3
-```
-
-Generated artifacts:
+Artifacts:
 
 ```text
-out/images/base-alpha3/initramfs.img
-out/images/base-alpha3/veyr-rootfs.ext4
-out/images/base-alpha3/Veyr-0.1.0-alpha.3-base-alpha3-x86_64.iso
+out/images/base-alpha4/initramfs.img
+out/images/base-alpha4/veyr-rootfs.ext4
+out/images/base-alpha4/Veyr-0.1.0-alpha.4-base-alpha4-x86_64.iso
 ```
 
-The root filesystem image is sparse and defaults to an 8 GiB logical size.
-Unlike alpha.2, the complete userspace is no longer unpacked into guest RAM.
+## Run alpha.4
 
-## Run in QEMU
+Serial/debug mode is recommended for the first run:
+
+```bash
+make run-alpha4-serial
+```
 
 Graphical:
 
 ```bash
-make run
+./veyr run base-alpha4
 ```
 
-or:
-
-```bash
-./veyr run base-alpha3
-```
-
-Serial/debug mode:
-
-```bash
-make run-alpha3-serial
-```
-
-A successful boot should contain:
+A successful runtime prints:
 
 ```text
-Disk root verification result: PASS
-Alpha.3 runtime verification: PASS
+Native chroot tool verification: PASS
+Alpha.4 runtime verification: PASS
 ```
 
-The normal alpha.3 VM uses approximately 2 GiB of guest RAM instead of the 8
-GiB required by alpha.2's giant initramfs.
+## Native chroot stage only
 
-## Enter the Veyr chroot
-
-After building alpha.3:
+To prepare the alpha.4 root and build only the native temporary tools:
 
 ```bash
-make chroot-alpha3
+./veyr build --profile temporary-alpha4
 ```
 
-or:
+Then enter it interactively:
 
 ```bash
-./scripts/chroot-alpha3.sh
+./scripts/chroot-alpha4.sh
 ```
-
-The helper prepares the virtual kernel filesystems, enters the staging Veyr
-root with a clean environment, and unmounts everything on exit.
 
 ## Regression profiles
 
-Bootstrap:
-
 ```bash
 make bootstrap
-make bootstrap-run
-```
-
-Alpha.1:
-
-```bash
 make alpha1
-make run-alpha1
-```
-
-Alpha.2:
-
-```bash
 make alpha2
-make run-alpha2
+make alpha3
 ```
 
-Alpha.2 intentionally retains its 8 GiB VM configuration because its userspace
-is stored entirely in initramfs.
+## Documentation
 
-## Useful Forge commands
-
-```bash
-./veyr --version
-./veyr doctor
-./veyr list packages
-./veyr list profiles
-./veyr graph base-alpha3
-./veyr info profile base-alpha3
-./veyr fetch --profile base-alpha3
-./veyr image base-alpha3
-./veyr run base-alpha3
-./veyr clean
-```
-
-## Roadmap
-
-See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+- [`docs/ROADMAP.md`](docs/ROADMAP.md)
 
 ## License
 
 Veyr project tooling, scripts, manifests, documentation, and original project
 assets are published under the repository license unless noted otherwise.
-
 Upstream projects retain their own licenses.
