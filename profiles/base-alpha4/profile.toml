@@ -1,0 +1,16 @@
+[profile]
+id = "base-alpha4"
+name = "Veyr Base Alpha 4"
+status = "active"
+description = "Native chroot tooling on the disk-backed Veyr root filesystem"
+parent = "temporary-alpha4"
+packages = []
+
+[image]
+steps = [
+  "scripts/finalize-alpha4-rootfs.sh",
+  "scripts/build-alpha4-initramfs.sh",
+  "scripts/validate-alpha4-image.sh",
+  "scripts/build-alpha4-iso.sh",
+]
+run = "scripts/run-alpha4-qemu.sh"

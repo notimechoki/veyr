@@ -1,0 +1,23 @@
+[package]
+name = "mpdecimal-native"
+version = "4.0.1"
+category = "native-temporary"
+description = "mpdecimal built natively inside Veyr"
+dependencies = ["zlib-native"]
+required_commands = []
+outputs = [
+  "build/images/base-alpha4/rootfs/usr/include/mpdecimal.h",
+  "build/images/base-alpha4/rootfs/usr/lib/libmpdec.so.4",
+  "build/images/base-alpha4/rootfs/usr/lib/veyr/native-build/mpdecimal-native.stamp",
+]
+
+[source]
+urls = [
+  "https://www.bytereef.org/software/mpdecimal/releases/mpdecimal-4.0.1.tar.gz",
+]
+archive = "mpdecimal-4.0.1.tar.gz"
+sha256 = "96d33abb4bb0070c7be0fed4246cd38416188325f820468214471938545b1ac8"
+
+[build]
+script = "build.sh"
+environment = "chroot"

@@ -1,0 +1,24 @@
+[profile]
+id = "temporary-alpha4"
+name = "Veyr Temporary Native Tools Alpha 4"
+status = "active"
+description = "Additional temporary build tools compiled natively inside the Veyr chroot"
+parent = "base-alpha3"
+packages = [
+  "gettext-native",
+  "bison-native",
+  "perl-native",
+  "zlib-native",
+  "mpdecimal-native",
+  "python-native",
+  "texinfo-native",
+  "util-linux-native",
+]
+
+[prepare]
+steps = [
+  "scripts/prepare-alpha4-rootfs.sh",
+]
+
+[chroot]
+root = "build/images/base-alpha4/rootfs"

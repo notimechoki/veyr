@@ -1,6 +1,6 @@
 [project]
 name = "Veyr"
-format = 2
+format = 3
 architecture = "x86_64"
 min_python = "3.11"
 
@@ -36,4 +36,10 @@ required_commands = [
   "grub2-mkrescue",
   "xorriso",
   "qemu-system-x86_64",
+  "sudo",
+  "mount",
+  "umount",
+  "mountpoint",
+  "chroot",
+  "realpath",
 ]

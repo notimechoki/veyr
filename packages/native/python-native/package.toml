@@ -1,0 +1,23 @@
+[package]
+name = "python-native"
+version = "3.14.7"
+category = "native-temporary"
+description = "Python built natively inside Veyr"
+dependencies = ["mpdecimal-native"]
+required_commands = []
+outputs = [
+  "build/images/base-alpha4/rootfs/usr/bin/python3",
+  "build/images/base-alpha4/rootfs/usr/lib/libpython3.14.so.1.0",
+  "build/images/base-alpha4/rootfs/usr/lib/veyr/native-build/python-native.stamp",
+]
+
+[source]
+urls = [
+  "https://www.python.org/ftp/python/3.14.7/Python-3.14.7.tar.xz",
+]
+archive = "Python-3.14.7.tar.xz"
+sha256 = "3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81"
+
+[build]
+script = "build.sh"
+environment = "chroot"

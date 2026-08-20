@@ -33,6 +33,8 @@ sudo dnf install -y \
     tar \
     file \
     e2fsprogs \
+    util-linux \
+    coreutils \
     openssl-devel \
     elfutils-libelf-devel \
     ncurses-devel \

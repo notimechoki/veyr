@@ -1,0 +1,23 @@
+[package]
+name = "texinfo-native"
+version = "7.3"
+category = "native-temporary"
+description = "GNU Texinfo built natively inside Veyr"
+dependencies = ["python-native"]
+required_commands = []
+outputs = [
+  "build/images/base-alpha4/rootfs/usr/bin/makeinfo",
+  "build/images/base-alpha4/rootfs/usr/lib/veyr/native-build/texinfo-native.stamp",
+]
+
+[source]
+urls = [
+  "https://ftpmirror.gnu.org/texinfo/texinfo-7.3.tar.xz",
+  "https://ftp.gnu.org/gnu/texinfo/texinfo-7.3.tar.xz",
+]
+archive = "texinfo-7.3.tar.xz"
+sha256 = "51f74eb0f51cfa9873b85264dfdd5d46e8957ec95b88f0fb762f63d9e164c72e"
+
+[build]
+script = "build.sh"
+environment = "chroot"

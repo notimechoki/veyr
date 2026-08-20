@@ -1,0 +1,79 @@
+#!/usr/libexec/busybox sh
+
+BB=/usr/libexec/busybox
+
+export PATH=/usr/bin:/usr/sbin:/bin:/sbin
+export HOME=/root
+export TERM=linux
+export SHELL=/usr/bin/bash
+unset LD_LIBRARY_PATH
+
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+fi
+
+"$BB" hostname veyr 2>/dev/null || true
+"$BB" chmod 1777 /tmp 2>/dev/null || true
+"$BB" clear 2>/dev/null || true
+
+if [ -f /etc/motd ]; then
+    "$BB" cat /etc/motd
+fi
+
+echo
+echo "Image profile: base-alpha4"
+echo
+echo "System information:"
+echo "-------------------"
+echo "Hostname: $($BB hostname 2>/dev/null || echo veyr)"
+echo "Kernel:   $($BB uname -r)"
+echo "Arch:     $($BB uname -m)"
+
+ALPHA4_OK=0
+
+if [ -x /usr/lib/veyr-tests/native-alpha4-smoke.sh ]; then
+    echo
+    echo "Native chroot tooling verification:"
+    echo "-----------------------------------"
+
+    if /usr/bin/bash /usr/lib/veyr-tests/native-alpha4-smoke.sh; then
+        echo "Alpha.4 runtime verification: PASS"
+        ALPHA4_OK=1
+    else
+        status=$?
+        echo "Alpha.4 runtime verification: FAIL (${status})"
+    fi
+fi
+
+if [ "$ALPHA4_OK" -eq 1 ]; then
+    echo
+    echo "Veyr alpha.4 native chroot toolchain is ready."
+    echo
+    echo "Useful commands:"
+    echo "  grep ' / ' /proc/mounts"
+    echo "  gcc -dumpmachine"
+    echo "  python3 --version"
+    echo "  perl --version"
+    echo "  bison --version"
+    echo "  msgfmt --version"
+    echo "  makeinfo --version"
+    echo "  lsblk --version"
+    echo "  poweroff -f"
+    echo "  reboot -f"
+else
+    echo
+    echo "[init] alpha.4 verification failed; starting diagnostic shell."
+fi
+
+echo
+echo "[init] Starting Veyr Bash console..."
+
+while :; do
+    "$BB" setsid "$BB" cttyhack /usr/bin/bash --noprofile --norc -i
+
+    status=$?
+
+    echo
+    echo "[init] Bash exited with status ${status}; restarting..."
+    "$BB" sleep 1
+done

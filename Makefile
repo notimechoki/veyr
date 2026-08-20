@@ -1,7 +1,7 @@
 SHELL := /usr/bin/env bash
 
 .PHONY: all
-all: alpha3
+all: alpha4
 
 .PHONY: deps
 deps:
@@ -19,7 +19,7 @@ list:
 
 .PHONY: graph
 graph:
-	./veyr graph base-alpha3
+	./veyr graph base-alpha4
 
 .PHONY: bootstrap-graph
 bootstrap-graph:
@@ -37,9 +37,13 @@ alpha2-graph:
 alpha3-graph:
 	./veyr graph base-alpha3
 
+.PHONY: alpha4-graph
+alpha4-graph:
+	./veyr graph base-alpha4
+
 .PHONY: fetch
 fetch:
-	./veyr fetch --profile base-alpha3
+	./veyr fetch --profile base-alpha4
 
 .PHONY: busybox
 busybox:
@@ -101,10 +105,6 @@ alpha3-initramfs:
 alpha3:
 	./veyr image base-alpha3
 
-.PHONY: run
-run:
-	./veyr run base-alpha3
-
 .PHONY: run-alpha3
 run-alpha3:
 	./veyr run base-alpha3
@@ -116,6 +116,30 @@ run-alpha3-serial:
 .PHONY: chroot-alpha3
 chroot-alpha3:
 	./scripts/chroot-alpha3.sh
+
+.PHONY: alpha4-temporary
+alpha4-temporary:
+	./veyr build --profile temporary-alpha4
+
+.PHONY: alpha4
+alpha4:
+	./veyr image base-alpha4
+
+.PHONY: run
+run:
+	./veyr run base-alpha4
+
+.PHONY: run-alpha4
+run-alpha4:
+	./veyr run base-alpha4
+
+.PHONY: run-alpha4-serial
+run-alpha4-serial:
+	./scripts/run-alpha4-serial.sh
+
+.PHONY: chroot-alpha4
+chroot-alpha4:
+	./scripts/chroot-alpha4.sh
 
 .PHONY: clean
 clean:

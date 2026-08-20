@@ -1,0 +1,24 @@
+[package]
+name = "zlib-native"
+version = "1.3.2"
+category = "native-temporary"
+description = "Zlib built natively inside Veyr"
+dependencies = ["perl-native"]
+required_commands = []
+outputs = [
+  "build/images/base-alpha4/rootfs/usr/include/zlib.h",
+  "build/images/base-alpha4/rootfs/usr/lib/libz.so.1",
+  "build/images/base-alpha4/rootfs/usr/lib/veyr/native-build/zlib-native.stamp",
+]
+
+[source]
+urls = [
+  "https://zlib.net/fossils/zlib-1.3.2.tar.gz",
+  "https://zlib.net/zlib-1.3.2.tar.gz",
+]
+archive = "zlib-1.3.2.tar.gz"
+sha256 = "bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16"
+
+[build]
+script = "build.sh"
+environment = "chroot"

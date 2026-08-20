@@ -1,0 +1,89 @@
+#!/bin/sh
+
+set -u
+
+BB=/bin/busybox
+ROOT_DEVICE=/dev/vda
+NEW_ROOT=/newroot
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export HOME=/root
+export TERM=linux
+
+"$BB" mkdir -p /dev /proc /sys /run /tmp "$NEW_ROOT"
+"$BB" mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+
+if [ -c /dev/console ]; then
+    exec </dev/console >/dev/console 2>&1
+fi
+
+"$BB" mount -t proc proc /proc 2>/dev/null || true
+"$BB" mount -t sysfs sysfs /sys 2>/dev/null || true
+"$BB" mount -t tmpfs tmpfs /run 2>/dev/null || true
+"$BB" mount -t tmpfs tmpfs /tmp 2>/dev/null || true
+"$BB" chmod 1777 /tmp 2>/dev/null || true
+
+rescue_shell() {
+    echo
+    echo "Veyr alpha.4 early rescue shell"
+    echo "==============================="
+    echo "Root device expected at: ${ROOT_DEVICE}"
+    echo "Useful commands:"
+    echo "  ls -l /dev"
+    echo "  cat /proc/partitions"
+    echo "  dmesg"
+    echo "  mount"
+    echo
+
+    while :; do
+        "$BB" sh -i
+        echo "[early-init] rescue shell exited; restarting"
+        "$BB" sleep 1
+    done
+}
+
+echo
+echo "Veyr alpha.4 early userspace"
+echo "----------------------------"
+echo "Waiting for disk root: ${ROOT_DEVICE}"
+
+attempt=0
+
+while [ ! -b "$ROOT_DEVICE" ]; do
+    attempt=$((attempt + 1))
+
+    if [ "$attempt" -ge 100 ]; then
+        echo "[early-init] root device did not appear"
+        rescue_shell
+    fi
+
+    "$BB" sleep 0.1
+done
+
+echo "[early-init] root device found"
+
+if ! "$BB" mount -t ext4 -o rw "$ROOT_DEVICE" "$NEW_ROOT"; then
+    echo "[early-init] failed to mount ${ROOT_DEVICE} as ext4"
+    rescue_shell
+fi
+
+if [ ! -x "$NEW_ROOT/sbin/init" ]; then
+    echo "[early-init] /sbin/init is missing on disk root"
+    "$BB" umount "$NEW_ROOT" 2>/dev/null || true
+    rescue_shell
+fi
+
+echo "[early-init] disk root mounted"
+echo "[early-init] moving virtual filesystems"
+
+"$BB" mount --move /dev "$NEW_ROOT/dev" || rescue_shell
+"$BB" mount --move /proc "$NEW_ROOT/proc" || rescue_shell
+"$BB" mount --move /sys "$NEW_ROOT/sys" || rescue_shell
+"$BB" mount --move /run "$NEW_ROOT/run" || rescue_shell
+
+echo "[early-init] switch_root -> ${ROOT_DEVICE}"
+
+exec "$BB" switch_root "$NEW_ROOT" /sbin/init
+
+echo "[early-init] switch_root failed"
+rescue_shell
